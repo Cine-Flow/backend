@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: cineflow
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydb
+    username: myuser
+    password: mypassword
+    driver-class-name: org.postgresql.Driver
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+api:
+  prefix: /api/v1
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+auth:
+  token:
+    jwtSecret: ${JWT_SECRET:defaultSecretKeyForDevelopment23423423423afawpehewarwtfs}
+    accessExpirationInMils: ${JWT_EXPIRATION:7200000}
