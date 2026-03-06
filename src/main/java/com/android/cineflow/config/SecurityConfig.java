@@ -66,11 +66,8 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                        // Admin endpoints
                         .requestMatchers(API + "/admin/**").hasAuthority("ROLE_ADMIN")
-                        // Secured endpoints
                         .requestMatchers(securedUrls.toArray(String[]::new)).authenticated()
-                        // Public endpoints
                         .requestMatchers(API + "/auth/**").permitAll()
                         .requestMatchers(API + "/films/**").permitAll()
                         .requestMatchers(API + "/categories/**").permitAll()
