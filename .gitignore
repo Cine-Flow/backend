@@ -32,3 +32,13 @@ build/
 ### VS Code ###
 .vscode/
 .env
+
+.cursor
+.claude
+.github
+.gitnexus
+.agents
+.sisyphus
+CLAUDE.md
+AGENTS.md
+ARCHITECTURE.md
