@@ -6,11 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FilmResponseDto {
+public class FilmDetailDto {
     private Integer id;
     private String title;
     private String description;
@@ -19,4 +22,6 @@ public class FilmResponseDto {
     private Integer releaseYear;
     private Boolean isPremium;
     private FilmType type;
+    private Instant createdAt;
+    private Instant updatedAt;
 }
