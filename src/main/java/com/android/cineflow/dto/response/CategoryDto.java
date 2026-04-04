@@ -1,6 +1,5 @@
 package com.android.cineflow.dto.response;
 
-import com.android.cineflow.model.enums.FilmType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,13 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FilmResponseDto {
+public class CategoryDto {
     private Integer id;
-    private String title;
+    private String name;
     private String description;
-    private String thumbnailUrl;
-    private String trailerUrl;
-    private Integer releaseYear;
-    private Boolean isPremium;
-    private FilmType type;
 }
