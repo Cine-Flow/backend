@@ -42,3 +42,6 @@ build/
 CLAUDE.md
 AGENTS.md
 ARCHITECTURE.md
+
+.DS_Store
+**/.DS_Store
