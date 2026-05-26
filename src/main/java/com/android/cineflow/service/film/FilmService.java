@@ -8,6 +8,9 @@ import com.android.cineflow.dto.response.HomeFilmsResponse;
 import com.android.cineflow.exceptions.ResourceNotFoundException;
 import com.android.cineflow.model.Film;
 import com.android.cineflow.model.enums.FilmType;
+import com.android.cineflow.repository.EpisodeRepository;
+import com.android.cineflow.model.Episode;
+import com.android.cineflow.dto.response.EpisodeDto;
 import com.android.cineflow.repository.FilmRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -23,6 +26,7 @@ import java.util.List;
 public class FilmService implements IFilmService {
 
     private final FilmRepository filmRepository;
+    private final EpisodeRepository episodeRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -123,6 +127,12 @@ public class FilmService implements IFilmService {
     }
 
     private FilmDetailDto toDetailDto(Film film) {
-        return modelMapper.map(film, FilmDetailDto.class);
+        FilmDetailDto dto = modelMapper.map(film, FilmDetailDto.class);
+        List<Episode> episodes = episodeRepository.findByFilmIdOrderByEpisodeNumberAsc(film.getId());
+        List<EpisodeDto> episodeDtos = episodes.stream()
+                .map(e -> modelMapper.map(e, EpisodeDto.class))
+                .toList();
+        dto.setEpisodes(episodeDtos);
+        return dto;
     }
 }

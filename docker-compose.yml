@@ -10,7 +10,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_android_data:/var/lib/postgresql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     restart: unless-stopped
 
 volumes:

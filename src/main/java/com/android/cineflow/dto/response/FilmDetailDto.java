@@ -24,4 +24,5 @@ public class FilmDetailDto {
     private FilmType type;
     private Instant createdAt;
     private Instant updatedAt;
+    private List<EpisodeDto> episodes;
 }
