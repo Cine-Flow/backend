@@ -66,13 +66,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        List<String> securedUrls = List.of(
-                API + "/user/**",
-                API + "/favorites/**",
-                API + "/watch-history/**",
-                API + "/subscriptions/**"
-        );
-
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -82,13 +75,19 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                        .requestMatchers(API + "/admin/**").permitAll()
-                        .requestMatchers(securedUrls.toArray(String[]::new)).permitAll()
                         .requestMatchers(API + "/auth/**").permitAll()
                         .requestMatchers(API + "/films/**").permitAll()
                         .requestMatchers(API + "/categories/**").permitAll()
                         .requestMatchers(API + "/episodes/**").permitAll()
-                        .anyRequest().permitAll())
+                        .requestMatchers(API + "/premier-league/**").permitAll()
+                        .requestMatchers(API + "/admin/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                API + "/user/**",
+                                API + "/favorites/**",
+                                API + "/watch-history/**",
+                                API + "/subscriptions/**"
+                        ).authenticated()
+                        .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
