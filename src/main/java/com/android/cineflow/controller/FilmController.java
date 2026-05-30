@@ -6,6 +6,7 @@ import com.android.cineflow.dto.response.ApiResponse;
 import com.android.cineflow.dto.response.FilmDetailDto;
 import com.android.cineflow.dto.response.FilmResponseDto;
 import com.android.cineflow.dto.response.HomeFilmsResponse;
+import com.android.cineflow.dto.response.PagedResponse;
 import com.android.cineflow.service.film.IFilmService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +36,12 @@ public class FilmController {
     // ─── Admin ───────────────────────────────────────────────────────────────────
 
     @GetMapping("/admin/films")
-    public ResponseEntity<ApiResponse<List<FilmDetailDto>>> getAllFilms() {
-        return ResponseEntity.ok(ApiResponse.success("Films fetched", filmService.getAllFilms()));
+    public ResponseEntity<ApiResponse<PagedResponse<FilmDetailDto>>> getAllFilms(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search) {
+        return ResponseEntity.ok(ApiResponse.success("Films fetched",
+                filmService.getAllFilmsPaged(page, size, search)));
     }
 
     @GetMapping("/admin/films/{id}")

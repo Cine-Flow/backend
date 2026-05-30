@@ -5,6 +5,7 @@ import com.android.cineflow.dto.request.UpdateFilmRequest;
 import com.android.cineflow.dto.response.FilmDetailDto;
 import com.android.cineflow.dto.response.FilmResponseDto;
 import com.android.cineflow.dto.response.HomeFilmsResponse;
+import com.android.cineflow.dto.response.PagedResponse;
 import com.android.cineflow.exceptions.ResourceNotFoundException;
 import com.android.cineflow.model.Film;
 import com.android.cineflow.model.enums.FilmType;
@@ -14,6 +15,7 @@ import com.android.cineflow.dto.response.EpisodeDto;
 import com.android.cineflow.repository.FilmRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -85,6 +87,26 @@ public class FilmService implements IFilmService {
                 .stream()
                 .map(this::toDetailDto)
                 .toList();
+    }
+
+    @Override
+    public PagedResponse<FilmDetailDto> getAllFilmsPaged(int page, int size, String search) {
+        Page<Film> filmPage;
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+
+        if (search != null && !search.isBlank()) {
+            String keyword = "%" + search.trim().toLowerCase() + "%";
+            filmPage = filmRepository.searchByKeyword(keyword, pageRequest);
+        } else {
+            filmPage = filmRepository.findAll(pageRequest);
+        }
+
+        List<FilmDetailDto> content = filmPage.getContent()
+                .stream()
+                .map(this::toDetailDto)
+                .toList();
+
+        return PagedResponse.of(content, filmPage.getNumber(), filmPage.getSize(), filmPage.getTotalElements());
     }
 
     @Override
