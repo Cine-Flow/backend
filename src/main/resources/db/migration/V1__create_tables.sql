@@ -264,27 +264,27 @@ INSERT INTO films (title, description, thumbnail_url, trailer_url, release_year,
 ('FIFA World Cup 2026 – Khai Mạc',
  'Lễ khai mạc FIFA World Cup 2026 tại Mỹ, Mexico và Canada – sự kiện bóng đá lớn nhất hành tinh.',
  'https://upload.wikimedia.org/wikipedia/en/thumb/e/e3/2026_FIFA_World_Cup.svg/250px-2026_FIFA_World_Cup.svg.png',
- NULL, 2026, TRUE, 'LIVE'),
+ 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', 2026, TRUE, 'LIVE'),
 
 ('Champions League – Chung Kết',
  'Trận chung kết UEFA Champions League – đêm đỉnh cao của bóng đá châu Âu.',
  'https://upload.wikimedia.org/wikipedia/en/thumb/b/bf/UEFA_Champions_League_logo_2.svg/220px-UEFA_Champions_League_logo_2.svg.png',
- NULL, 2026, TRUE, 'LIVE'),
+ 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', 2026, TRUE, 'LIVE'),
 
 ('NBA Finals 2026 – Game 7',
  'Trận quyết định NBA Finals 2026 – ai sẽ nâng cao chiếc cúp Larry O''Brien?',
  'https://upload.wikimedia.org/wikipedia/en/thumb/0/03/National_Basketball_Association_logo.svg/200px-National_Basketball_Association_logo.svg.png',
- NULL, 2026, FALSE, 'LIVE'),
+ 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', 2026, FALSE, 'LIVE'),
 
 ('Wimbledon 2026 – Nam Đơn Chung Kết',
  'Chung kết đơn nam Wimbledon 2026 trên sân cỏ huyền thoại Centre Court.',
  'https://upload.wikimedia.org/wikipedia/en/thumb/9/9d/Wimbledon_2023_Logo.svg/220px-Wimbledon_2023_Logo.svg.png',
- NULL, 2026, FALSE, 'LIVE'),
+ 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', 2026, FALSE, 'LIVE'),
 
 ('Formula 1 – Monaco Grand Prix',
  'Chặng đua danh giá nhất lịch sử F1 quanh các đường phố Monte Carlo.',
  'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/F1.svg/200px-F1.svg.png',
- NULL, 2026, TRUE, 'LIVE');
+ 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', 2026, TRUE, 'LIVE');
 
 -- ── Film categories ───────────────────────────────────────────────────────────
 INSERT INTO film_categories (film_id, category_id) VALUES

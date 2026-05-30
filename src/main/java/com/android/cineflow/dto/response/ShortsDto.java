@@ -13,6 +13,9 @@ public class ShortsDto {
     private Integer id;
     private String title;
     private String thumbnailUrl;
+    private String videoUrl;
+    private String description;
+    private String uploader;
     private Integer duration;
     private Integer viewCount;
 }
