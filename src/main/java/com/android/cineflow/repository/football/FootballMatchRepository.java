@@ -9,6 +9,7 @@ import java.util.List;
 
 @Repository
 public interface FootballMatchRepository extends JpaRepository<FootballMatch, Integer> {
+    List<FootballMatch> findAllByOrderByKickoffAtDesc();
     List<FootballMatch> findByStatusInOrderByKickoffAtAsc(Collection<String> statuses);
     List<FootballMatch> findByStatusOrderByKickoffAtDesc(String status);
 }

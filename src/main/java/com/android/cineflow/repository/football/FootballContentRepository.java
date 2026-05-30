@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface FootballContentRepository extends JpaRepository<FootballContent, Integer> {
+    List<FootballContent> findAllByOrderByPublishedAtDesc();
     List<FootballContent> findByContentTypeOrderByPublishedAtDesc(String contentType);
 }

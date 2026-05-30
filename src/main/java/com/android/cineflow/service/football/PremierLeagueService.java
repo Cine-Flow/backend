@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,8 @@ public class PremierLeagueService implements IPremierLeagueService {
     private static final String CONTENT_BANNER = "BANNER";
     private static final String CONTENT_HIGHLIGHT = "HIGHLIGHT";
     private static final String CONTENT_NEWS = "NEWS";
+    private static final Set<String> MATCH_STATUSES = Set.of(STATUS_LIVE, STATUS_SCHEDULED, STATUS_FINISHED);
+    private static final Set<String> CONTENT_TYPES = Set.of(CONTENT_BANNER, CONTENT_HIGHLIGHT, CONTENT_NEWS);
 
     private final FootballMatchRepository matchRepository;
     private final FootballStandingRepository standingRepository;
@@ -49,10 +53,44 @@ public class PremierLeagueService implements IPremierLeagueService {
     }
 
     @Override
+    public List<FootballMatchDto> getMatches(String status) {
+        if (status == null || status.isBlank()) {
+            return toMatchDtos(matchRepository.findAllByOrderByKickoffAtDesc());
+        }
+
+        String normalizedStatus = normalizeFilter(status);
+        if (!MATCH_STATUSES.contains(normalizedStatus)) {
+            throw new IllegalArgumentException("Unsupported football match status: " + status);
+        }
+        return toMatchDtos(matchRepository.findByStatusOrderByKickoffAtDesc(normalizedStatus));
+    }
+
+    @Override
     public FootballMatchDto getMatchById(Integer id) {
         return matchRepository.findById(id)
                 .map(this::toMatchDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Football match not found with id: " + id));
+    }
+
+    @Override
+    public List<FootballStandingDto> getStandings() {
+        return standingRepository.findBySeasonOrderByRankAsc(CURRENT_SEASON)
+                .stream()
+                .map(this::toStandingDto)
+                .toList();
+    }
+
+    @Override
+    public List<FootballContentDto> getContents(String type) {
+        if (type == null || type.isBlank()) {
+            return toContentDtos(contentRepository.findAllByOrderByPublishedAtDesc());
+        }
+
+        String normalizedType = normalizeFilter(type);
+        if (!CONTENT_TYPES.contains(normalizedType)) {
+            throw new IllegalArgumentException("Unsupported football content type: " + type);
+        }
+        return toContentDtos(contentRepository.findByContentTypeOrderByPublishedAtDesc(normalizedType));
     }
 
     @Override
@@ -118,5 +156,9 @@ public class PremierLeagueService implements IPremierLeagueService {
                 .badge(content.getBadge())
                 .publishedAt(content.getPublishedAt())
                 .build();
+    }
+
+    private String normalizeFilter(String value) {
+        return value.trim().toUpperCase(Locale.ROOT);
     }
 }
