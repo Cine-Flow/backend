@@ -76,6 +76,15 @@ public class FilmService implements IFilmService {
     }
 
     @Override
+    public List<FilmResponseDto> getFilmsByType(FilmType type) {
+        Sort byIdDesc = Sort.by(Sort.Direction.DESC, "id");
+        List<Film> films = filmRepository.findAll(byIdDesc).stream()
+                .filter(f -> f.getType() == type)
+                .toList();
+        return toDto(films);
+    }
+
+    @Override
     public FilmResponseDto createFilm(CreateFilmRequest request) {
         Film film = modelMapper.map(request, Film.class);
         return modelMapper.map(filmRepository.save(film), FilmResponseDto.class);
