@@ -29,6 +29,8 @@ public class PremierLeagueService implements IPremierLeagueService {
     private static final String CONTENT_BANNER = "BANNER";
     private static final String CONTENT_HIGHLIGHT = "HIGHLIGHT";
     private static final String CONTENT_NEWS = "NEWS";
+    private static final int HOME_MATCH_PREVIEW_LIMIT = 5;
+    private static final int HOME_STANDINGS_PREVIEW_LIMIT = 10;
     private static final Set<String> MATCH_STATUSES = Set.of(STATUS_LIVE, STATUS_SCHEDULED, STATUS_FINISHED);
     private static final Set<String> CONTENT_TYPES = Set.of(CONTENT_BANNER, CONTENT_HIGHLIGHT, CONTENT_NEWS);
 
@@ -42,10 +44,17 @@ public class PremierLeagueService implements IPremierLeagueService {
                 .banners(toContentDtos(contentRepository.findByContentTypeOrderByPublishedAtDesc(CONTENT_BANNER)))
                 .highlights(toContentDtos(contentRepository.findByContentTypeOrderByPublishedAtDesc(CONTENT_HIGHLIGHT)))
                 .schedule(toMatchDtos(matchRepository.findByStatusInOrderByKickoffAtAsc(
-                        List.of(STATUS_LIVE, STATUS_SCHEDULED))))
-                .results(toMatchDtos(matchRepository.findByStatusOrderByKickoffAtDesc(STATUS_FINISHED)))
+                                List.of(STATUS_LIVE, STATUS_SCHEDULED))
+                        .stream()
+                        .limit(HOME_MATCH_PREVIEW_LIMIT)
+                        .toList()))
+                .results(toMatchDtos(matchRepository.findByStatusOrderByKickoffAtDesc(STATUS_FINISHED)
+                        .stream()
+                        .limit(HOME_MATCH_PREVIEW_LIMIT)
+                        .toList()))
                 .standings(standingRepository.findBySeasonOrderByRankAsc(CURRENT_SEASON)
                         .stream()
+                        .limit(HOME_STANDINGS_PREVIEW_LIMIT)
                         .map(this::toStandingDto)
                         .toList())
                 .news(toContentDtos(contentRepository.findByContentTypeOrderByPublishedAtDesc(CONTENT_NEWS)))
