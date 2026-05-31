@@ -28,6 +28,12 @@ public class FilmController {
         return ResponseEntity.ok(ApiResponse.success("Home films fetched", filmService.getHomeFilms()));
     }
 
+    @GetMapping("/films")
+    public ResponseEntity<ApiResponse<List<FilmResponseDto>>> getFilmsByType(
+            @RequestParam("type") com.android.cineflow.model.enums.FilmType type) {
+        return ResponseEntity.ok(ApiResponse.success("Films fetched", filmService.getFilmsByType(type)));
+    }
+
     @GetMapping("/films/{id}")
     public ResponseEntity<ApiResponse<FilmDetailDto>> getFilmById(@PathVariable Integer id) {
         return ResponseEntity.ok(ApiResponse.success("Film fetched", filmService.getFilmById(id)));
