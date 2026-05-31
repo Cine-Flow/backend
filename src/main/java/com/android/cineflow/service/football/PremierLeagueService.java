@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class PremierLeagueService implements IPremierLeagueService {
     private static final String STATUS_LIVE = "LIVE";
     private static final String STATUS_SCHEDULED = "SCHEDULED";
     private static final String STATUS_FINISHED = "FINISHED";
+    private static final String STATUS_UPCOMING = "UPCOMING";
     private static final String CONTENT_BANNER = "BANNER";
     private static final String CONTENT_HIGHLIGHT = "HIGHLIGHT";
     private static final String CONTENT_NEWS = "NEWS";
@@ -62,14 +65,26 @@ public class PremierLeagueService implements IPremierLeagueService {
     }
 
     @Override
-    public List<FootballMatchDto> getMatches(String status) {
+    public List<FootballMatchDto> getMatches(String status, LocalDate date) {
         if (status == null || status.isBlank()) {
             return toMatchDtos(matchRepository.findAllByOrderByKickoffAtDesc());
         }
 
         String normalizedStatus = normalizeFilter(status);
+        if (STATUS_UPCOMING.equals(normalizedStatus)) {
+            if (date != null) {
+                return toMatchDtos(matchRepository.findByStatusInAndKickoffAtBetweenOrderByKickoffAtAsc(
+                        List.of(STATUS_LIVE, STATUS_SCHEDULED), startOfDay(date), startOfNextDay(date)));
+            }
+            return toMatchDtos(matchRepository.findByStatusInOrderByKickoffAtAsc(
+                    List.of(STATUS_LIVE, STATUS_SCHEDULED)));
+        }
         if (!MATCH_STATUSES.contains(normalizedStatus)) {
             throw new IllegalArgumentException("Unsupported football match status: " + status);
+        }
+        if (date != null) {
+            return toMatchDtos(matchRepository.findByStatusAndKickoffAtBetweenOrderByKickoffAtDesc(
+                    normalizedStatus, startOfDay(date), startOfNextDay(date)));
         }
         return toMatchDtos(matchRepository.findByStatusOrderByKickoffAtDesc(normalizedStatus));
     }
@@ -169,5 +184,13 @@ public class PremierLeagueService implements IPremierLeagueService {
 
     private String normalizeFilter(String value) {
         return value.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private LocalDateTime startOfDay(LocalDate date) {
+        return date.atStartOfDay();
+    }
+
+    private LocalDateTime startOfNextDay(LocalDate date) {
+        return date.plusDays(1).atStartOfDay();
     }
 }

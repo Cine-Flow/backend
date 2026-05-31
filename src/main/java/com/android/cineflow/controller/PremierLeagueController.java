@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.List;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("${api.prefix}/premier-league")
@@ -30,9 +32,11 @@ public class PremierLeagueController {
 
     @GetMapping("/matches")
     public ResponseEntity<ApiResponse<List<FootballMatchDto>>> getMatches(
-            @RequestParam(required = false) String status) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(ApiResponse.success("Football matches fetched",
-                premierLeagueService.getMatches(status)));
+                premierLeagueService.getMatches(status, date)));
     }
 
     @GetMapping("/matches/{id}")
