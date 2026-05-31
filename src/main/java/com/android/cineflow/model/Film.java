@@ -39,4 +39,7 @@ public class Film {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private FilmType type;
+
+    @Column(name = "badge")
+    private String badge;
 }

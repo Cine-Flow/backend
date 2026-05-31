@@ -3,9 +3,9 @@ spring:
     name: cineflow
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydb
-    username: myuser
-    password: mypassword
+    url: jdbc:postgresql://localhost:5432/cineflow
+    username: postgres
+    password: 123456
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -17,6 +17,7 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
+    ignore-migration-patterns: "*:missing"
 
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}

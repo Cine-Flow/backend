@@ -15,6 +15,8 @@ import java.util.List;
 public interface FilmRepository extends JpaRepository<Film, Integer> {
     List<Film> findByTypeIn(List<FilmType> types, Pageable pageable);
     List<Film> findByType(FilmType type, Pageable pageable);
+    List<Film> findByType(FilmType type);
+    List<Film> findByTypeAndBadge(FilmType type, String badge);
 
     @Query("SELECT f FROM Film f WHERE " +
            "LOWER(f.title) LIKE :keyword OR " +
