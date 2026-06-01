@@ -48,3 +48,8 @@ auth:
   token:
     jwtSecret: ${JWT_SECRET:defaultSecretKeyForDevelopment23423423423afawpehewarwtfs}
     accessExpirationInMils: ${JWT_EXPIRATION:7200000}
+
+football:
+  api:
+    url: https://api.football-data.org
+    token: ${FOOTBALL_API_TOKEN:a89e7a27090c4fe790e3d618f1bc6009}

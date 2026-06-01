@@ -1,6 +1,7 @@
 package com.android.cineflow.service.football;
 
 import com.android.cineflow.dto.response.football.*;
+import com.android.cineflow.dto.response.football.external.FootballDataResponse;
 import com.android.cineflow.exceptions.ResourceNotFoundException;
 import com.android.cineflow.model.Film;
 import com.android.cineflow.model.enums.FilmType;
@@ -28,42 +29,76 @@ public class PremierLeagueService implements IPremierLeagueService {
     private static final int HOME_STANDINGS_PREVIEW_LIMIT = 10;
 
     private final FilmRepository filmRepository;
+    private final FootballDataClient footballDataClient;
 
     @Override
     public PremierLeagueHomeResponse getHome() {
+        List<FootballMatchDto> allMatches = getAllMatchesFromApiOrMock();
+
+        List<FootballMatchDto> schedule = allMatches.stream()
+                .filter(m -> STATUS_LIVE.equals(m.getStatus()) || STATUS_SCHEDULED.equals(m.getStatus()))
+                .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt))
+                .limit(HOME_MATCH_PREVIEW_LIMIT)
+                .toList();
+
+        List<FootballMatchDto> results = allMatches.stream()
+                .filter(m -> STATUS_FINISHED.equals(m.getStatus()))
+                .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt).reversed())
+                .limit(HOME_MATCH_PREVIEW_LIMIT)
+                .toList();
+
         return PremierLeagueHomeResponse.builder()
                 .banners(toContentDtos(filmRepository.findByTypeAndBadge(FilmType.SPORTS, "BANNER")))
                 .highlights(toContentDtos(filmRepository.findByTypeAndBadge(FilmType.SPORTS, "HIGHLIGHT")))
-                .schedule(getMockScheduleMatches().stream().limit(HOME_MATCH_PREVIEW_LIMIT).toList())
-                .results(getMockResultMatches().stream().limit(HOME_MATCH_PREVIEW_LIMIT).toList())
-                .standings(getMockStandings().stream().limit(HOME_STANDINGS_PREVIEW_LIMIT).toList())
+                .schedule(schedule)
+                .results(results)
+                .standings(getStandings().stream().limit(HOME_STANDINGS_PREVIEW_LIMIT).toList())
                 .news(toContentDtos(filmRepository.findByTypeAndBadge(FilmType.SPORTS, "NEWS")))
                 .build();
     }
 
     @Override
     public List<FootballMatchDto> getMatches(String status, LocalDate date) {
-        List<FootballMatchDto> allMatches = new ArrayList<>();
-        allMatches.addAll(getMockScheduleMatches());
-        allMatches.addAll(getMockResultMatches());
+        List<FootballMatchDto> allMatches = getAllMatchesFromApiOrMock();
+
+        if (date != null) {
+            allMatches = allMatches.stream()
+                    .filter(m -> m.getKickoffAt().toLocalDate().equals(date))
+                    .toList();
+        }
 
         if (status == null || status.isBlank()) {
-            return allMatches;
+            return allMatches.stream()
+                    .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt))
+                    .toList();
         }
 
         String normalizedStatus = status.trim().toUpperCase(Locale.ROOT);
-        return allMatches.stream()
-                .filter(m -> normalizedStatus.equals(m.getStatus()) ||
-                            ("UPCOMING".equals(normalizedStatus) &&
-                             (STATUS_LIVE.equals(m.getStatus()) || STATUS_SCHEDULED.equals(m.getStatus()))))
-                .toList();
+        if (STATUS_FINISHED.equals(normalizedStatus)) {
+            return allMatches.stream()
+                    .filter(m -> STATUS_FINISHED.equals(m.getStatus()))
+                    .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt).reversed())
+                    .toList();
+        } else {
+            // For Schedule (UPCOMING) mode:
+            // If a specific date is selected, return ALL matches on that date (allowing users to view old kickoff times)
+            // If no date is selected, return only live/scheduled matches
+            if (date != null) {
+                return allMatches.stream()
+                        .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt))
+                        .toList();
+            } else {
+                return allMatches.stream()
+                        .filter(m -> STATUS_LIVE.equals(m.getStatus()) || STATUS_SCHEDULED.equals(m.getStatus()))
+                        .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt))
+                        .toList();
+            }
+        }
     }
 
     @Override
     public FootballMatchDto getMatchById(Integer id) {
-        List<FootballMatchDto> allMatches = new ArrayList<>();
-        allMatches.addAll(getMockScheduleMatches());
-        allMatches.addAll(getMockResultMatches());
+        List<FootballMatchDto> allMatches = getAllMatchesFromApiOrMock();
 
         return allMatches.stream()
                 .filter(m -> m.getId().equals(id))
@@ -73,7 +108,103 @@ public class PremierLeagueService implements IPremierLeagueService {
 
     @Override
     public List<FootballStandingDto> getStandings() {
+        try {
+            FootballDataResponse.StandingsEnvelope envelope = footballDataClient.getStandingsFromApi();
+            if (envelope != null && envelope.getStandings() != null && !envelope.getStandings().isEmpty()) {
+                return envelope.getStandings().stream()
+                        .filter(s -> "TOTAL".equals(s.getType()))
+                        .findFirst()
+                        .map(s -> s.getTable().stream().map(this::toStandingDto).toList())
+                        .orElseGet(this::getMockStandings);
+            }
+        } catch (Exception ignored) {}
         return getMockStandings();
+    }
+
+    private FootballStandingDto toStandingDto(FootballDataResponse.ExternalTableEntry entry) {
+        return FootballStandingDto.builder()
+                .season(CURRENT_SEASON)
+                .rank(entry.getPosition())
+                .team(FootballTeamDto.builder()
+                        .id(entry.getTeam().getId())
+                        .code(entry.getTeam().getTla())
+                        .name(entry.getTeam().getShortName() != null ? entry.getTeam().getShortName() : entry.getTeam().getName())
+                        .logoUrl(entry.getTeam().getCrest())
+                        .build())
+                .played(entry.getPlayedGames())
+                .won(entry.getWon())
+                .drawn(entry.getDraw())
+                .lost(entry.getLost())
+                .goalDifference(entry.getGoalDifference())
+                .points(entry.getPoints())
+                .build();
+    }
+
+    private List<FootballMatchDto> getAllMatchesFromApiOrMock() {
+        try {
+            FootballDataResponse.MatchesEnvelope envelope = footballDataClient.getMatchesFromApi();
+            if (envelope != null && envelope.getMatches() != null && !envelope.getMatches().isEmpty()) {
+                return envelope.getMatches().stream().map(this::toMatchDto).toList();
+            }
+        } catch (Exception ignored) {}
+        List<FootballMatchDto> allMock = new ArrayList<>();
+        allMock.addAll(getMockScheduleMatches());
+        allMock.addAll(getMockResultMatches());
+        return allMock;
+    }
+
+    private FootballMatchDto toMatchDto(FootballDataResponse.ExternalMatch match) {
+        LocalDateTime kickoff = LocalDateTime.now();
+        if (match.getUtcDate() != null) {
+            try {
+                kickoff = java.time.OffsetDateTime.parse(match.getUtcDate()).toLocalDateTime();
+            } catch (Exception ignored) {}
+        }
+
+        String status = STATUS_SCHEDULED;
+        if (match.getStatus() != null) {
+            String extStatus = match.getStatus().toUpperCase(Locale.ROOT);
+            if ("FINISHED".equals(extStatus)) {
+                status = STATUS_FINISHED;
+            } else if ("LIVE".equals(extStatus) || "IN_PLAY".equals(extStatus) || "PAUSED".equals(extStatus)) {
+                status = STATUS_LIVE;
+            }
+        }
+
+        Integer homeScore = null;
+        Integer awayScore = null;
+        if ((STATUS_FINISHED.equals(status) || STATUS_LIVE.equals(status))
+                && match.getScore() != null && match.getScore().getFullTime() != null) {
+            homeScore = match.getScore().getFullTime().getHome();
+            awayScore = match.getScore().getFullTime().getAway();
+        }
+
+        String highlightUrl = null;
+        if (STATUS_FINISHED.equals(status)) {
+            highlightUrl = "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+        }
+
+        return FootballMatchDto.builder()
+                .id(match.getId())
+                .homeTeam(FootballTeamDto.builder()
+                        .id(match.getHomeTeam().getId())
+                        .code(match.getHomeTeam().getTla())
+                        .name(match.getHomeTeam().getShortName() != null ? match.getHomeTeam().getShortName() : match.getHomeTeam().getName())
+                        .logoUrl(match.getHomeTeam().getCrest())
+                        .build())
+                .awayTeam(FootballTeamDto.builder()
+                        .id(match.getAwayTeam().getId())
+                        .code(match.getAwayTeam().getTla())
+                        .name(match.getAwayTeam().getShortName() != null ? match.getAwayTeam().getShortName() : match.getAwayTeam().getName())
+                        .logoUrl(match.getAwayTeam().getCrest())
+                        .build())
+                .kickoffAt(kickoff)
+                .round("Vòng " + (match.getMatchday() != null ? match.getMatchday() : ""))
+                .status(status)
+                .homeScore(homeScore)
+                .awayScore(awayScore)
+                .highlightUrl(highlightUrl)
+                .build();
     }
 
     @Override
@@ -159,8 +290,6 @@ public class PremierLeagueService implements IPremierLeagueService {
                 .kickoffAt(LocalDateTime.now())
                 .round("Vòng 38")
                 .status(STATUS_LIVE)
-                .homeScore(2)
-                .awayScore(2)
                 .build());
 
         list.add(FootballMatchDto.builder()
