@@ -1,6 +1,6 @@
 package com.android.cineflow.controller;
 
-import com.android.cineflow.dto.request.UpdateWatchHistoryRequest;
+import com.android.cineflow.dto.request.*;
 import com.android.cineflow.dto.response.*;
 import com.android.cineflow.service.user.UserContentService;
 import jakarta.validation.Valid;
@@ -47,6 +47,22 @@ public class UserContentController {
     @GetMapping("/user/me")
     public ResponseEntity<ApiResponse<UserProfileDto>> getProfile() {
         return ResponseEntity.ok(ApiResponse.success("Profile fetched", userContentService.getProfile()));
+    }
+
+    @PutMapping("/user/profile")
+    public ResponseEntity<ApiResponse<UserProfileDto>> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Hồ sơ đã được cập nhật thành công", userContentService.updateProfile(request)));
+    }
+
+    @PostMapping("/user/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        userContentService.changePassword(request);
+        return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công", null));
+    }
+
+    @GetMapping("/user/analytics")
+    public ResponseEntity<ApiResponse<UserAnalyticsDto>> getUserAnalytics() {
+        return ResponseEntity.ok(ApiResponse.success("User analytics fetched", userContentService.getUserAnalytics()));
     }
 
     @GetMapping("/subscriptions/current")
