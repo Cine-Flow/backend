@@ -19,7 +19,10 @@ public class AppConfig {
 
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate();
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(1500); // 1.5s timeout
+        factory.setReadTimeout(1500);    // 1.5s timeout
+        return new RestTemplate(factory);
     }
 
     @Bean
