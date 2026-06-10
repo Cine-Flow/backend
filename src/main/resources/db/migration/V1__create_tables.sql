@@ -11,9 +11,9 @@ DO $$ BEGIN
 END $$;
 
 -- Create database if not exists (must be run outside a transaction block)
--- Run manually if needed: CREATE DATABASE mydb OWNER myuser;
+-- Run manually if needed: CREATE DATABASE cineflow OWNER myuser;
 
-GRANT ALL PRIVILEGES ON DATABASE mydb TO myuser;
+GRANT ALL PRIVILEGES ON DATABASE cineflow TO myuser;
 
 -- ========================
 -- Enum types
