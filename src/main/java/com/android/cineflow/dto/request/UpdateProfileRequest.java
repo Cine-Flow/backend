@@ -12,4 +12,6 @@ public class UpdateProfileRequest {
 
     @NotBlank(message = "Full name is required")
     private String fullName;
+
+    private String phoneNumber;
 }

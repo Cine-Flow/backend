@@ -10,6 +10,7 @@ public class UserProfileDto {
     private String username;
     private String email;
     private String fullName;
+    private String phoneNumber;
     private String avatarUrl;
     private String role;
     private long favoriteCount;
