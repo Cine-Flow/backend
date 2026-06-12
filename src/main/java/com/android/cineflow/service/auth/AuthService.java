@@ -37,6 +37,7 @@ public class AuthService implements IAuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final IEmailService emailService;
+    private final RefreshTokenService refreshTokenService;
 
     private static final int RESET_TOKEN_EXPIRY_MINUTES = 30;
 
@@ -50,11 +51,17 @@ public class AuthService implements IAuthService {
         String jwt = jwtUtils.generateAccessToken(authentication);
 
         AppUserDetails userDetails = (AppUserDetails) authentication.getPrincipal();
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        // Create refresh token
+        com.android.cineflow.model.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         log.info("Login successful for user: {}", userDetails.getUsername());
 
         return new LoginResponse(
                 jwt,
+                refreshToken.getToken(),
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
@@ -136,6 +143,9 @@ public class AuthService implements IAuthService {
         user.setResetTokenExpiry(null);
         userRepository.save(user);
 
+        // Force all devices to re-login by revoking all refresh tokens
+        refreshTokenService.revokeAllByUserId(user.getId());
+
         log.info("Password reset successful for user: {}", user.getEmail());
     }
 
@@ -144,5 +154,33 @@ public class AuthService implements IAuthService {
         return userRepository.findByResetToken(token)
                 .map(User::isResetTokenValid)
                 .orElse(false);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public LoginResponse refreshToken(com.android.cineflow.dto.request.TokenRefreshRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
+
+        // Rotate token (verify, revoke old, create new)
+        com.android.cineflow.model.RefreshToken rotatedToken = refreshTokenService.rotateToken(requestRefreshToken);
+        User user = rotatedToken.getUser();
+
+        // Generate new access token
+        String accessToken = jwtUtils.generateToken(user.getEmail(), user.getId(), user.getRole().name());
+
+        return LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(rotatedToken.getToken())
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .build();
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public void logout(String refreshToken) {
+        refreshTokenService.deleteByToken(refreshToken);
     }
 }

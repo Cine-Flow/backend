@@ -79,7 +79,7 @@ public class UserContentService {
         User user = currentUserService.getCurrentUser();
         return UserProfileDto.builder()
                 .id(user.getId()).username(user.getUsername()).email(user.getEmail())
-                .fullName(user.getFullName()).avatarUrl(user.getAvatarUrl()).role(user.getRole().name())
+                .fullName(user.getFullName()).phoneNumber(user.getPhoneNumber()).avatarUrl(user.getAvatarUrl()).role(user.getRole().name())
                 .favoriteCount(favoriteRepository.countByUserId(user.getId()))
                 .watchHistoryCount(watchHistoryRepository.countByUserId(user.getId()))
                 .currentSubscription(getCurrentSubscription(user.getId()))
@@ -184,6 +184,7 @@ public class UserContentService {
     public UserProfileDto updateProfile(UpdateProfileRequest request) {
         User user = currentUserService.getCurrentUser();
         user.setFullName(request.getFullName());
+        user.setPhoneNumber(request.getPhoneNumber());
         userRepository.save(user);
         return getProfile();
     }

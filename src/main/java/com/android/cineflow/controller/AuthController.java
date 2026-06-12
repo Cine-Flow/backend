@@ -51,4 +51,18 @@ public class AuthController {
         boolean isValid = authService.validateResetToken(token);
         return ResponseEntity.ok(ApiResponse.success("Token validation result", isValid));
     }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(
+            @Valid @RequestBody com.android.cineflow.dto.request.TokenRefreshRequest request) {
+        LoginResponse response = authService.refreshToken(request);
+        return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", response));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @Valid @RequestBody com.android.cineflow.dto.request.TokenRefreshRequest request) {
+        authService.logout(request.getRefreshToken());
+        return ResponseEntity.ok(ApiResponse.success("Logged out successfully"));
+    }
 }
