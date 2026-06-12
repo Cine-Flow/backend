@@ -47,7 +47,8 @@ cors:
 auth:
   token:
     jwtSecret: ${JWT_SECRET:defaultSecretKeyForDevelopment23423423423afawpehewarwtfs}
-    accessExpirationInMils: ${JWT_EXPIRATION:7200000}
+    accessExpirationInMils: ${JWT_EXPIRATION:120000}
+    refreshExpirationInDays: ${REFRESH_EXPIRATION_DAYS:7}
 
 football:
   api:

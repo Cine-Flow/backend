@@ -16,5 +16,9 @@ public interface IAuthService {
     void resetPassword(ResetPasswordRequest request);
 
     boolean validateResetToken(String token);
+
+    LoginResponse refreshToken(com.android.cineflow.dto.request.TokenRefreshRequest request);
+
+    void logout(String refreshToken);
 }
 
