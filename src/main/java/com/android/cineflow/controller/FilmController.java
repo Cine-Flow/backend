@@ -56,9 +56,9 @@ public class FilmController {
     }
 
     @PostMapping("/admin/films")
-    public ResponseEntity<ApiResponse<FilmResponseDto>> createFilm(
+    public ResponseEntity<ApiResponse<FilmDetailDto>> createFilm(
             @Valid @RequestBody CreateFilmRequest request) {
-        FilmResponseDto created = filmService.createFilm(request);
+        FilmDetailDto created = filmService.createFilm(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Film created successfully", created));
     }

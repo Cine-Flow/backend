@@ -79,6 +79,7 @@ public class SecurityConfig {
                         .requestMatchers(API + "/categories/**").permitAll()
                         .requestMatchers(API + "/episodes/**").permitAll()
                         .requestMatchers(API + "/premier-league/**").permitAll()
+                        .requestMatchers(API + "/files/**").permitAll()
                         .requestMatchers(API + "/admin/**").hasRole("ADMIN")
                         .requestMatchers(
                                 API + "/user/**",

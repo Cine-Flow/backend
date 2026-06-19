@@ -85,9 +85,27 @@ public class FilmService implements IFilmService {
     }
 
     @Override
-    public FilmResponseDto createFilm(CreateFilmRequest request) {
+    @Transactional
+    public FilmDetailDto createFilm(CreateFilmRequest request) {
         Film film = modelMapper.map(request, Film.class);
-        return modelMapper.map(filmRepository.save(film), FilmResponseDto.class);
+        Film saved = filmRepository.save(film);
+
+        // Auto-create a single episode for SINGLE films when videoUrl is provided
+        if (saved.getType() == FilmType.SINGLE
+                && request.getVideoUrl() != null
+                && !request.getVideoUrl().isBlank()) {
+            Episode episode = Episode.builder()
+                    .film(saved)
+                    .episodeNumber(1)
+                    .title(saved.getTitle() + " (Bản Full)")
+                    .videoUrl(request.getVideoUrl())
+                    .duration(7200)
+                    .viewCount(0)
+                    .build();
+            episodeRepository.save(episode);
+        }
+
+        return toDetailDto(saved);
     }
 
     @Override
@@ -139,7 +157,32 @@ public class FilmService implements IFilmService {
         film.setIsPremium(request.getIsPremium());
         film.setType(request.getType());
 
-        return toDetailDto(filmRepository.save(film));
+        Film saved = filmRepository.save(film);
+
+        // Update or create episode for SINGLE films when videoUrl is provided
+        if (saved.getType() == FilmType.SINGLE
+                && request.getVideoUrl() != null
+                && !request.getVideoUrl().isBlank()) {
+            List<Episode> episodes = episodeRepository.findByFilmIdOrderByEpisodeNumberAsc(saved.getId());
+            if (!episodes.isEmpty()) {
+                Episode ep = episodes.get(0);
+                ep.setVideoUrl(request.getVideoUrl());
+                ep.setTitle(saved.getTitle() + " (Bản Full)");
+                episodeRepository.save(ep);
+            } else {
+                Episode episode = Episode.builder()
+                        .film(saved)
+                        .episodeNumber(1)
+                        .title(saved.getTitle() + " (Bản Full)")
+                        .videoUrl(request.getVideoUrl())
+                        .duration(7200)
+                        .viewCount(0)
+                        .build();
+                episodeRepository.save(episode);
+            }
+        }
+
+        return toDetailDto(saved);
     }
 
     @Override
