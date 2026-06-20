@@ -7,6 +7,7 @@ public class FootballDataResponse {
 
     @Data
     public static class StandingsEnvelope {
+        private ExternalSeason season;
         private List<ExternalStanding> standings;
     }
 
@@ -31,7 +32,16 @@ public class FootballDataResponse {
 
     @Data
     public static class MatchesEnvelope {
+        private ExternalSeason season;
         private List<ExternalMatch> matches;
+    }
+
+    @Data
+    public static class ExternalSeason {
+        private Integer id;
+        private String startDate;
+        private String endDate;
+        private Integer currentMatchday;
     }
 
     @Data

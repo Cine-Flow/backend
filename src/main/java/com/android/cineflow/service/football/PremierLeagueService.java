@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -22,6 +25,7 @@ import java.util.Locale;
 public class PremierLeagueService implements IPremierLeagueService {
 
     private static final String CURRENT_SEASON = "2025/26";
+    private static final ZoneId DISPLAY_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
     private static final String STATUS_LIVE = "LIVE";
     private static final String STATUS_SCHEDULED = "SCHEDULED";
     private static final String STATUS_FINISHED = "FINISHED";
@@ -33,17 +37,11 @@ public class PremierLeagueService implements IPremierLeagueService {
 
     @Override
     public PremierLeagueHomeResponse getHome() {
-        List<FootballMatchDto> allMatches = getAllMatchesFromApiOrMock();
-
-        List<FootballMatchDto> schedule = allMatches.stream()
-                .filter(m -> STATUS_LIVE.equals(m.getStatus()) || STATUS_SCHEDULED.equals(m.getStatus()))
-                .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt))
+        List<FootballMatchDto> schedule = getUpcomingMatchesFromApi(null).stream()
                 .limit(HOME_MATCH_PREVIEW_LIMIT)
                 .toList();
 
-        List<FootballMatchDto> results = allMatches.stream()
-                .filter(m -> STATUS_FINISHED.equals(m.getStatus()))
-                .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt).reversed())
+        List<FootballMatchDto> results = getFinishedMatchesFromApi(null).stream()
                 .limit(HOME_MATCH_PREVIEW_LIMIT)
                 .toList();
 
@@ -59,46 +57,30 @@ public class PremierLeagueService implements IPremierLeagueService {
 
     @Override
     public List<FootballMatchDto> getMatches(String status, LocalDate date) {
-        List<FootballMatchDto> allMatches = getAllMatchesFromApiOrMock();
-
-        if (date != null) {
-            allMatches = allMatches.stream()
-                    .filter(m -> m.getKickoffAt().toLocalDate().equals(date))
-                    .toList();
-        }
-
         if (status == null || status.isBlank()) {
-            return allMatches.stream()
+            return getMatchesFromApi(date, date, null, currentPremierLeagueSeasonStartYear()).stream()
                     .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt))
                     .toList();
         }
 
         String normalizedStatus = status.trim().toUpperCase(Locale.ROOT);
         if (STATUS_FINISHED.equals(normalizedStatus)) {
-            return allMatches.stream()
-                    .filter(m -> STATUS_FINISHED.equals(m.getStatus()))
-                    .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt).reversed())
-                    .toList();
-        } else {
-            // For Schedule (UPCOMING) mode:
-            // If a specific date is selected, return ALL matches on that date (allowing users to view old kickoff times)
-            // If no date is selected, return only live/scheduled matches
-            if (date != null) {
-                return allMatches.stream()
-                        .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt))
-                        .toList();
-            } else {
-                return allMatches.stream()
-                        .filter(m -> STATUS_LIVE.equals(m.getStatus()) || STATUS_SCHEDULED.equals(m.getStatus()))
-                        .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt))
-                        .toList();
-            }
+            return getFinishedMatchesFromApi(date);
         }
+
+        if (date != null) {
+            return getMatchesFromApi(date, date, null, null).stream()
+                    .filter(m -> STATUS_LIVE.equals(m.getStatus()) || STATUS_SCHEDULED.equals(m.getStatus()))
+                    .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt))
+                    .toList();
+        }
+
+        return getUpcomingMatchesFromApi(null);
     }
 
     @Override
     public FootballMatchDto getMatchById(Integer id) {
-        List<FootballMatchDto> allMatches = getAllMatchesFromApiOrMock();
+        List<FootballMatchDto> allMatches = getMatchesFromApi(null, null, null, null);
 
         return allMatches.stream()
                 .filter(m -> m.getId().equals(id))
@@ -109,27 +91,31 @@ public class PremierLeagueService implements IPremierLeagueService {
     @Override
     public List<FootballStandingDto> getStandings() {
         try {
-            FootballDataResponse.StandingsEnvelope envelope = footballDataClient.getStandingsFromApi();
+            FootballDataResponse.StandingsEnvelope envelope =
+                    footballDataClient.getStandingsFromApi(currentPremierLeagueSeasonStartYear());
             if (envelope != null && envelope.getStandings() != null && !envelope.getStandings().isEmpty()) {
+                String seasonLabel = toSeasonLabel(envelope.getSeason());
                 return envelope.getStandings().stream()
                         .filter(s -> "TOTAL".equals(s.getType()))
                         .findFirst()
-                        .map(s -> s.getTable().stream().map(this::toStandingDto).toList())
-                        .orElseGet(this::getMockStandings);
+                        .map(s -> s.getTable().stream()
+                                .map(entry -> toStandingDto(entry, seasonLabel))
+                                .toList())
+                        .orElseGet(List::of);
             }
         } catch (Exception ignored) {}
-        return getMockStandings();
+        return List.of();
     }
 
-    private FootballStandingDto toStandingDto(FootballDataResponse.ExternalTableEntry entry) {
+    private FootballStandingDto toStandingDto(FootballDataResponse.ExternalTableEntry entry, String seasonLabel) {
         return FootballStandingDto.builder()
-                .season(CURRENT_SEASON)
+                .season(seasonLabel)
                 .rank(entry.getPosition())
                 .team(FootballTeamDto.builder()
-                        .id(entry.getTeam().getId())
-                        .code(entry.getTeam().getTla())
-                        .name(entry.getTeam().getShortName() != null ? entry.getTeam().getShortName() : entry.getTeam().getName())
-                        .logoUrl(entry.getTeam().getCrest())
+                        .id(entry.getTeam() != null ? entry.getTeam().getId() : null)
+                        .code(entry.getTeam() != null ? entry.getTeam().getTla() : "")
+                        .name(teamName(entry.getTeam()))
+                        .logoUrl(entry.getTeam() != null ? entry.getTeam().getCrest() : "")
                         .build())
                 .played(entry.getPlayedGames())
                 .won(entry.getWon())
@@ -140,24 +126,47 @@ public class PremierLeagueService implements IPremierLeagueService {
                 .build();
     }
 
-    private List<FootballMatchDto> getAllMatchesFromApiOrMock() {
+    private List<FootballMatchDto> getUpcomingMatchesFromApi(LocalDate date) {
+        LocalDate today = LocalDate.now(DISPLAY_ZONE);
+        LocalDate from = date != null ? date : today;
+        LocalDate to = date != null ? date : today.plusYears(1);
+        return getMatchesFromApi(from, to, null, null).stream()
+                .filter(m -> STATUS_LIVE.equals(m.getStatus()) || STATUS_SCHEDULED.equals(m.getStatus()))
+                .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt))
+                .toList();
+    }
+
+    private List<FootballMatchDto> getFinishedMatchesFromApi(LocalDate date) {
+        LocalDate today = LocalDate.now(DISPLAY_ZONE);
+        LocalDate from = date != null ? date : today.minusYears(1);
+        LocalDate to = date != null ? date : today;
+        return getMatchesFromApi(from, to, STATUS_FINISHED, currentPremierLeagueSeasonStartYear()).stream()
+                .filter(m -> STATUS_FINISHED.equals(m.getStatus()))
+                .sorted(java.util.Comparator.comparing(FootballMatchDto::getKickoffAt).reversed())
+                .toList();
+    }
+
+    private List<FootballMatchDto> getMatchesFromApi(LocalDate dateFrom,
+                                                     LocalDate dateTo,
+                                                     String status,
+                                                     Integer season) {
         try {
-            FootballDataResponse.MatchesEnvelope envelope = footballDataClient.getMatchesFromApi();
+            FootballDataResponse.MatchesEnvelope envelope =
+                    footballDataClient.getMatchesFromApi(dateFrom, dateTo, status, season);
             if (envelope != null && envelope.getMatches() != null && !envelope.getMatches().isEmpty()) {
                 return envelope.getMatches().stream().map(this::toMatchDto).toList();
             }
         } catch (Exception ignored) {}
-        List<FootballMatchDto> allMock = new ArrayList<>();
-        allMock.addAll(getMockScheduleMatches());
-        allMock.addAll(getMockResultMatches());
-        return allMock;
+        return List.of();
     }
 
     private FootballMatchDto toMatchDto(FootballDataResponse.ExternalMatch match) {
         LocalDateTime kickoff = LocalDateTime.now();
         if (match.getUtcDate() != null) {
             try {
-                kickoff = java.time.OffsetDateTime.parse(match.getUtcDate()).toLocalDateTime();
+                kickoff = OffsetDateTime.parse(match.getUtcDate())
+                        .atZoneSameInstant(DISPLAY_ZONE)
+                        .toLocalDateTime();
             } catch (Exception ignored) {}
         }
 
@@ -168,6 +177,10 @@ public class PremierLeagueService implements IPremierLeagueService {
                 status = STATUS_FINISHED;
             } else if ("LIVE".equals(extStatus) || "IN_PLAY".equals(extStatus) || "PAUSED".equals(extStatus)) {
                 status = STATUS_LIVE;
+            } else if ("SCHEDULED".equals(extStatus) || "TIMED".equals(extStatus)) {
+                status = STATUS_SCHEDULED;
+            } else {
+                status = extStatus;
             }
         }
 
@@ -187,16 +200,16 @@ public class PremierLeagueService implements IPremierLeagueService {
         return FootballMatchDto.builder()
                 .id(match.getId())
                 .homeTeam(FootballTeamDto.builder()
-                        .id(match.getHomeTeam().getId())
-                        .code(match.getHomeTeam().getTla())
-                        .name(match.getHomeTeam().getShortName() != null ? match.getHomeTeam().getShortName() : match.getHomeTeam().getName())
-                        .logoUrl(match.getHomeTeam().getCrest())
+                        .id(match.getHomeTeam() != null ? match.getHomeTeam().getId() : null)
+                        .code(match.getHomeTeam() != null ? match.getHomeTeam().getTla() : "")
+                        .name(teamName(match.getHomeTeam()))
+                        .logoUrl(match.getHomeTeam() != null ? match.getHomeTeam().getCrest() : "")
                         .build())
                 .awayTeam(FootballTeamDto.builder()
-                        .id(match.getAwayTeam().getId())
-                        .code(match.getAwayTeam().getTla())
-                        .name(match.getAwayTeam().getShortName() != null ? match.getAwayTeam().getShortName() : match.getAwayTeam().getName())
-                        .logoUrl(match.getAwayTeam().getCrest())
+                        .id(match.getAwayTeam() != null ? match.getAwayTeam().getId() : null)
+                        .code(match.getAwayTeam() != null ? match.getAwayTeam().getTla() : "")
+                        .name(teamName(match.getAwayTeam()))
+                        .logoUrl(match.getAwayTeam() != null ? match.getAwayTeam().getCrest() : "")
                         .build())
                 .kickoffAt(kickoff)
                 .round("Vòng " + (match.getMatchday() != null ? match.getMatchday() : ""))
@@ -205,6 +218,30 @@ public class PremierLeagueService implements IPremierLeagueService {
                 .awayScore(awayScore)
                 .highlightUrl(highlightUrl)
                 .build();
+    }
+
+    private int currentPremierLeagueSeasonStartYear() {
+        LocalDate today = LocalDate.now(DISPLAY_ZONE);
+        return today.getMonthValue() >= Month.JULY.getValue() ? today.getYear() : today.getYear() - 1;
+    }
+
+    private String toSeasonLabel(FootballDataResponse.ExternalSeason season) {
+        if (season == null || season.getStartDate() == null || season.getStartDate().length() < 4) {
+            return CURRENT_SEASON;
+        }
+        try {
+            int startYear = Integer.parseInt(season.getStartDate().substring(0, 4));
+            return startYear + "/" + String.format(Locale.US, "%02d", (startYear + 1) % 100);
+        } catch (NumberFormatException ignored) {
+            return CURRENT_SEASON;
+        }
+    }
+
+    private String teamName(FootballDataResponse.ExternalTeam team) {
+        if (team == null) {
+            return "";
+        }
+        return team.getShortName() != null ? team.getShortName() : team.getName();
     }
 
     @Override
