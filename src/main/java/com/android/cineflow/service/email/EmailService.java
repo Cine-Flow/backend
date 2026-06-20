@@ -36,7 +36,7 @@ public class EmailService implements IEmailService {
             helper.setSubject("CineFlow - Password Reset Request");
 
             String resetLink = frontendUrl + "/reset-password?token=" + token;
-            String htmlContent = buildPasswordResetEmailContent(username, resetLink);
+            String htmlContent = buildPasswordResetEmailContent(username, resetLink, token);
 
             helper.setText(htmlContent, true);
             mailSender.send(message);
@@ -69,7 +69,7 @@ public class EmailService implements IEmailService {
         }
     }
 
-    private String buildPasswordResetEmailContent(String username, String resetLink) {
+    private String buildPasswordResetEmailContent(String username, String resetLink, String token) {
         return """
             <!DOCTYPE html>
             <html>
@@ -81,6 +81,7 @@ public class EmailService implements IEmailService {
                     .header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
                     .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
                     .button { display: inline-block; background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+                    .token { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 12px; font-family: monospace; word-break: break-all; }
                     .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
                 </style>
             </head>
@@ -96,6 +97,8 @@ public class EmailService implements IEmailService {
                         <p style="text-align: center;">
                             <a href="%s" class="button">Reset Password</a>
                         </p>
+                        <p>If you are resetting your password in the Android app, copy this token:</p>
+                        <p class="token">%s</p>
                         <p>This link will expire in 30 minutes.</p>
                         <p>If you didn't request a password reset, you can safely ignore this email.</p>
                         <p>Best regards,<br>The CineFlow Team</p>
@@ -106,7 +109,7 @@ public class EmailService implements IEmailService {
                 </div>
             </body>
             </html>
-            """.formatted(username, resetLink);
+            """.formatted(username, resetLink, token);
     }
 
     private String buildWelcomeEmailContent(String username) {
