@@ -2,6 +2,7 @@ package com.android.cineflow.service.user;
 
 import com.android.cineflow.dto.request.*;
 import com.android.cineflow.dto.response.*;
+import com.android.cineflow.exceptions.DuplicateResourceException;
 import com.android.cineflow.exceptions.ResourceNotFoundException;
 import com.android.cineflow.model.*;
 import com.android.cineflow.model.enums.SubscriptionStatus;
@@ -183,7 +184,13 @@ public class UserContentService {
     @Transactional
     public UserProfileDto updateProfile(UpdateProfileRequest request) {
         User user = currentUserService.getCurrentUser();
+        userRepository.findByEmail(request.getEmail())
+                .filter(existing -> !existing.getId().equals(user.getId()))
+                .ifPresent(existing -> {
+                    throw new DuplicateResourceException("Email already exists");
+                });
         user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail().trim());
         user.setPhoneNumber(request.getPhoneNumber());
         userRepository.save(user);
         return getProfile();
