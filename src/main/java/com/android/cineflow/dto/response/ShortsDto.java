@@ -18,5 +18,8 @@ public class ShortsDto {
     private String uploader;
     private Integer duration;
     private Integer viewCount;
+    private Integer likeCount;
+    private Boolean liked;
 }
+
 
