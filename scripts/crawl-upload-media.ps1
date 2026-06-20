@@ -252,7 +252,11 @@ foreach ($seed in $seeds) {
                 $extension = ".mp4"
             }
             $localPath = Join-Path $CacheDir "$safeBaseName$extension"
-            Download-MediaFile -Url $sourceUrl -DestinationPath $localPath
+            if (-not (Test-Path -LiteralPath $localPath)) {
+                Download-MediaFile -Url $sourceUrl -DestinationPath $localPath
+            } else {
+                Write-Host "Using cached file: $localPath"
+            }
             $uploadedUrl = Upload-MediaFile -FilePath $localPath -Folder $seed.folder
             if (-not $KeepDownloads) {
                 Remove-Item -LiteralPath $localPath -Force

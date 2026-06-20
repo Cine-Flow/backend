@@ -6,6 +6,7 @@ import com.android.cineflow.dto.response.EpisodeDto;
 import com.android.cineflow.exceptions.ResourceNotFoundException;
 import com.android.cineflow.model.Episode;
 import com.android.cineflow.model.Film;
+import com.android.cineflow.model.enums.FilmType;
 import com.android.cineflow.repository.EpisodeRepository;
 import com.android.cineflow.repository.FilmRepository;
 import jakarta.validation.Valid;
@@ -41,6 +42,12 @@ public class EpisodeController {
             @Valid @RequestBody CreateEpisodeRequest request) {
         Film film = filmRepository.findById(filmId)
                 .orElseThrow(() -> new ResourceNotFoundException("Film not found with id: " + filmId));
+        if (film.getType() != FilmType.SERIES) {
+            throw new IllegalArgumentException("Only SERIES films can have manually managed episodes.");
+        }
+        if (episodeRepository.existsByFilmIdAndEpisodeNumber(filmId, request.getEpisodeNumber())) {
+            throw new IllegalArgumentException("Episode number already exists for this film.");
+        }
 
         Episode episode = Episode.builder()
                 .film(film)
@@ -62,6 +69,10 @@ public class EpisodeController {
             @Valid @RequestBody CreateEpisodeRequest request) {
         Episode episode = episodeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Episode not found with id: " + id));
+        Integer filmId = episode.getFilm().getId();
+        if (episodeRepository.existsByFilmIdAndEpisodeNumberAndIdNot(filmId, request.getEpisodeNumber(), id)) {
+            throw new IllegalArgumentException("Episode number already exists for this film.");
+        }
 
         episode.setEpisodeNumber(request.getEpisodeNumber());
         episode.setTitle(request.getTitle());

@@ -158,6 +158,7 @@ public class FilmService implements IFilmService {
         film.setType(request.getType());
 
         Film saved = filmRepository.save(film);
+        syncEpisodesForType(saved, request.getVideoUrl());
 
         // Update or create episode for SINGLE films when videoUrl is provided
         if (saved.getType() == FilmType.SINGLE
@@ -198,6 +199,38 @@ public class FilmService implements IFilmService {
         return films.stream()
                 .map(f -> modelMapper.map(f, FilmResponseDto.class))
                 .toList();
+    }
+
+    private void syncEpisodesForType(Film film, String videoUrl) {
+        if (film.getType() == FilmType.LIVE) {
+            episodeRepository.deleteByFilmId(film.getId());
+            return;
+        }
+
+        if (film.getType() != FilmType.SINGLE || videoUrl == null || videoUrl.isBlank()) {
+            return;
+        }
+
+        List<Episode> episodes = episodeRepository.findByFilmIdOrderByEpisodeNumberAsc(film.getId());
+        for (int i = 1; i < episodes.size(); i++) {
+            episodeRepository.delete(episodes.get(i));
+        }
+
+        Episode episode = episodes.isEmpty()
+                ? Episode.builder()
+                        .film(film)
+                        .episodeNumber(1)
+                        .duration(7200)
+                        .viewCount(0)
+                        .build()
+                : episodes.get(0);
+        episode.setEpisodeNumber(1);
+        episode.setTitle(film.getTitle() + " (Full Movie)");
+        episode.setVideoUrl(videoUrl);
+        if (episode.getDuration() == null) {
+            episode.setDuration(7200);
+        }
+        episodeRepository.save(episode);
     }
 
     private FilmDetailDto toDetailDto(Film film) {
