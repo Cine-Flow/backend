@@ -1,0 +1,89 @@
+[
+  {
+    "title": "Sintel",
+    "category": "Hành động",
+    "type": "SINGLE",
+    "source": "archive",
+    "identifier": "Sintel",
+    "preferredFile": "sintel-2048-stereo.mp4",
+    "folder": "films"
+  },
+  {
+    "title": "His Girl Friday",
+    "category": "Lãng mạn",
+    "type": "SINGLE",
+    "source": "archive",
+    "identifier": "HisGirlFriday",
+    "preferredFile": "MoviePowderPresentsHisGirlFriday.mp4",
+    "folder": "films"
+  },
+  {
+    "title": "Carnival of Souls",
+    "category": "Kinh dị",
+    "type": "SINGLE",
+    "source": "archive",
+    "identifier": "CarnivalofSouls",
+    "preferredFile": "CarnivalOfSouls.mp4",
+    "folder": "films"
+  },
+  {
+    "title": "The General",
+    "category": "Hài hước",
+    "type": "SINGLE",
+    "source": "archive",
+    "identifier": "TheGeneral",
+    "preferredFile": "The_General_512kb.mp4",
+    "folder": "films"
+  },
+  {
+    "title": "Teenagers From Outer Space",
+    "category": "Khoa học viễn tưởng",
+    "type": "SINGLE",
+    "source": "archive",
+    "identifier": "TeenagersFromOuterSpace",
+    "preferredFile": "TeenagersFromOuterSpace.mp4",
+    "folder": "films"
+  },
+  {
+    "title": "Big Buck Bunny",
+    "category": "Hoạt hình",
+    "type": "SINGLE",
+    "source": "archive",
+    "identifier": "BigBuckBunny_328",
+    "preferredFile": "BigBuckBunny_512kb.mp4",
+    "folder": "films"
+  },
+  {
+    "title": "Flower",
+    "category": "Tài liệu",
+    "type": "SINGLE",
+    "source": "direct",
+    "sourceUrl": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+    "folder": "films"
+  },
+  {
+    "title": "Boys Soccer April 2022",
+    "category": "Thể thao",
+    "type": "SPORTS",
+    "source": "archive",
+    "identifier": "sf17ut-SF_v_MM_Boys_Soccer_April_21_2022",
+    "preferredFile": "SF_v_MM_Boys_Soccer_April_21_2022.mp4",
+    "folder": "films"
+  },
+  {
+    "title": "Trailer 5s",
+    "category": "Trailer",
+    "type": "SHORT",
+    "source": "direct",
+    "sourceUrl": "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    "folder": "trailers"
+  },
+  {
+    "title": "Trailer 10s",
+    "category": "Trailer",
+    "type": "SHORT",
+    "source": "direct",
+    "sourceUrl": "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+    "folder": "trailers"
+  }
+]

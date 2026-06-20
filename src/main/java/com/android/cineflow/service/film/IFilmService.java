@@ -14,7 +14,7 @@ import java.util.List;
 public interface IFilmService {
     HomeFilmsResponse getHomeFilms();
     List<FilmResponseDto> getFilmsByType(FilmType type);
-    FilmResponseDto createFilm(CreateFilmRequest request);
+    FilmDetailDto createFilm(CreateFilmRequest request);
     List<FilmDetailDto> getAllFilms();
     PagedResponse<FilmDetailDto> getAllFilmsPaged(int page, int size, String search);
     FilmDetailDto getFilmById(Integer id);

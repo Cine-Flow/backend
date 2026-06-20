@@ -25,4 +25,6 @@ public class CreateFilmRequest {
 
     @NotNull(message = "Film type is required")
     private FilmType type;
+
+    private String videoUrl;
 }

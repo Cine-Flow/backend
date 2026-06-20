@@ -2,6 +2,11 @@ spring:
   application:
     name: cineflow
 
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+
   datasource:
     url: jdbc:postgresql://localhost:5432/cineflow
     username: postgres
@@ -54,3 +59,9 @@ football:
   api:
     url: https://api.football-data.org
     token: ${FOOTBALL_API_TOKEN:a89e7a27090c4fe790e3d618f1bc6009}
+
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  bucket-name: ${MINIO_BUCKET_NAME:cineflow-media}
