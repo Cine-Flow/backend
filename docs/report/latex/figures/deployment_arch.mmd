@@ -1,0 +1,21 @@
+%%{init: {"theme": "default"}}%%
+flowchart TB
+    subgraph Mobile["Mạng thiết bị di động"]
+        AND[Android Device / Emulator]
+    end
+
+    subgraph App["Mạng Backend (Application Network)"]
+        SB[Spring Boot App<br/>JAR / localhost:8080]
+    end
+
+    subgraph Data["Mạng Dữ liệu (Docker Internal)"]
+        PG[(PostgreSQL 16<br/>Container :5432)]
+    end
+
+    SMTP[Email SMTP Server<br/>Bên ngoài]
+    CDN[Video Source<br/>HTTP / HLS / DASH]
+
+    AND -->|HTTP REST<br/>10.0.2.2:8080| SB
+    AND -->|HTTP/HLS Streaming| CDN
+    SB -->|JDBC<br/>jdbc:postgresql://localhost:5432/mydb| PG
+    SB -->|SMTP| SMTP

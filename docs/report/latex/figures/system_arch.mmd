@@ -1,0 +1,33 @@
+%%{init: {"theme": "default"}}%%
+flowchart TB
+    subgraph Mobile["Thiết bị di động (Android)"]
+        UI[UI Layer<br/>Activity, Fragment, Adapter]
+        Repo[Repository Layer<br/>HomeRepo, AdminFilmRepo,<br/>PremierLeagueRepo]
+        Auth[AuthManager<br/>SharedPreferences]
+        Net[Network Layer<br/>Retrofit + OkHttp<br/>AuthInterceptor]
+        Player[ExoPlayer Media3]
+        UI --> Repo
+        UI --> Auth
+        UI --> Player
+        Repo --> Net
+        Net --> Auth
+    end
+
+    subgraph Backend["Backend (Spring Boot)"]
+        Ctrl[Controller Layer<br/>AuthController, FilmController,<br/>AdminFilmController]
+        Svc[Service Layer<br/>AuthService, FilmService,<br/>EmailService]
+        RepoJ[Repository Layer<br/>Spring Data JPA]
+        Sec[Spring Security<br/>JwtUtils, AuthTokenFilter]
+        Ctrl --> Svc
+        Svc --> RepoJ
+        Ctrl -.-> Sec
+    end
+
+    DB[(PostgreSQL<br/>+ Flyway)]
+    SMTP[Email Server<br/>SMTP]
+    CDN[Video URLs<br/>HTTP / HLS / DASH]
+
+    Net -->|REST API<br/>/api/v1/...| Ctrl
+    RepoJ -->|JDBC| DB
+    Svc -->|Spring Mail| SMTP
+    Player -->|Streaming trực tiếp| CDN

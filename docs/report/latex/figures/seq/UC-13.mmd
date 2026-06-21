@@ -1,0 +1,24 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor A as Admin
+    participant AL as AdminFilmListActivity
+    participant DLG as FilmFormDialogFragment
+    participant AR as AdminFilmRepository
+    participant API as AdminFilmController
+    participant SVC as FilmService
+    participant DB as PostgreSQL
+
+    A->>AL: Bấm "Sửa" trên item
+    AL->>DLG: show(filmId, currentData)
+    A->>DLG: Sửa và Lưu
+    DLG->>AR: updateFilm(id, request)
+    AR->>API: PUT /admin/films/{id}
+    API->>SVC: updateFilm(id, request)
+    SVC->>DB: UPDATE films
+    DB-->>SVC: OK
+    SVC-->>API: FilmResponse
+    API-->>AR: 200 ApiResponse OK
+    AR-->>DLG: success
+    DLG-->>AL: dismiss()
+    AL->>AR: refreshList()
+    AL-->>A: Danh sách cập nhật

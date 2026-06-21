@@ -1,0 +1,18 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant PF as PremierLeagueFragment
+    participant PR as PremierLeagueRepository
+    participant API as Backend API
+    participant DB as PostgreSQL
+
+    U->>PF: Chọn mùa giải / ngày
+    PF->>PR: loadSchedule(season, date)
+    PR->>API: GET /football/pl/schedule
+    API->>DB: SELECT matches by season, date
+    DB-->>API: Danh sách trận
+    API->>API: Quy đổi UTC -> Asia/Ho_Chi_Minh
+    API-->>PR: ApiResponse OK
+    PR-->>PF: LiveData update
+    PF->>PF: Render theo nhóm ngày
+    PF-->>U: Hiển thị lịch

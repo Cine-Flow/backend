@@ -1,0 +1,29 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor A as Admin
+    participant CA as AdminCategoryActivity
+    participant CR as CategoryRepository
+    participant API as AdminCategoryController
+    participant SVC as CategoryService
+    participant DB as PostgreSQL
+
+    A->>CA: Mở khu vực Categories
+    CA->>CR: loadCategories()
+    CR->>API: GET /admin/categories
+    API->>SVC: list()
+    SVC->>DB: SELECT categories
+    DB-->>SVC: Danh sách
+    SVC-->>API: ApiResponse
+    API-->>CR: OK
+    CR-->>CA: LiveData
+
+    A->>CA: Thêm / Sửa / Xoá
+    CA->>CR: CRUD operation
+    CR->>API: POST/PUT/DELETE /admin/categories
+    API->>SVC: process
+    SVC->>DB: write
+    DB-->>SVC: OK
+    SVC-->>API: ApiResponse
+    API-->>CR: OK
+    CR-->>CA: refresh
+    CA-->>A: Danh sách cập nhật

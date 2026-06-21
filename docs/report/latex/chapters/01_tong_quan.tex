@@ -1,0 +1,302 @@
+% ============================================================
+%  CHƯƠNG I: TỔNG QUAN
+% ============================================================
+\chapter{TỔNG QUAN}
+\label{chap:tong_quan}
+
+% ────────────────────────────────────────────────────────────
+\section{Giới thiệu đề tài}
+\label{sec:gioi_thieu}
+
+\subsection{Bối cảnh}
+\label{subsec:boi_canh}
+
+Trong những năm gần đây, hành vi tiêu thụ nội dung giải trí của người dùng tại Việt Nam và
+trên toàn cầu đã dịch chuyển mạnh mẽ từ truyền hình truyền thống sang các nền tảng phát
+trực tuyến (streaming) trên thiết bị di động nhờ sự phổ biến của các dịch vụ như Netflix,
+Disney+, FPT Play hay Galaxy Play. Mô hình này không chỉ đem lại trải nghiệm xem phim
+linh hoạt theo nhu cầu cá nhân mà còn mở ra một thị trường nội dung số khổng lồ với
+hàng tỷ giờ xem mỗi năm.
+
+Tuy nhiên, đằng sau giao diện xem phim đơn giản là những bài toán kỹ thuật phức tạp mà
+các hệ thống này phải giải quyết:
+
+\begin{itemize}
+    \item \textbf{Phát video trực tuyến hiệu năng cao:} Trình phát phải xử lý được các định
+    dạng streaming hiện đại (HLS, DASH), thích nghi chất lượng theo băng thông và quản lý
+    chặt chẽ vòng đời của các thành phần giao diện trên di động.
+
+    \item \textbf{Tổ chức nội dung phong phú:} Trang chủ một ứng dụng streaming thường có
+    nhiều khu vực nội dung khác nhau (banner, phim mới, series nổi bật, sự kiện thể thao),
+    yêu cầu một mô hình dữ liệu và cơ chế tải bất đồng bộ đủ linh hoạt.
+
+    \item \textbf{Xác thực và phân quyền:} Hệ thống cần phân biệt rõ ràng giữa người xem
+    thông thường và quản trị viên — đây là bài toán xác thực không trạng thái (stateless
+    authentication) giữa ứng dụng di động và máy chủ web.
+
+    \item \textbf{Giao tiếp client–server qua mạng không ổn định:} Mọi thao tác đều phải
+    đi qua mạng di động, đòi hỏi cơ chế tải dữ liệu bất đồng bộ, caching ảnh và xử lý lỗi
+    mạng — nếu không, ứng dụng sẽ giật và mất phản hồi.
+
+    \item \textbf{Tương thích hệ sinh thái Android:} Ứng dụng phải chạy ổn định trên dải
+    thiết bị Android đa dạng về kích thước màn hình và cấu hình phần cứng, đồng thời tuân
+    thủ vòng đời (lifecycle) chặt chẽ của hệ điều hành.
+\end{itemize}
+
+Đề tài \textbf{CineFlow} ra đời từ nhu cầu nghiên cứu và xây dựng một ứng dụng xem phim
+trực tuyến hiện đại trên nền tảng di động, áp dụng kiến trúc client–server và các kỹ
+thuật lập trình Android chuẩn mực để giải quyết các thách thức nêu trên trong điều kiện
+thực tế. Đây không phải là bài toán học thuật đơn thuần mà là một bài toán kỹ thuật phần
+mềm có tính ứng dụng cao.
+
+\subsection{Mục tiêu}
+\label{subsec:muc_tieu}
+
+Mục tiêu của đồ án là xây dựng một ứng dụng xem phim trực tuyến hoàn chỉnh trên nền tảng
+Android — từ phía client đến phía server — với các chức năng cốt lõi gồm: quản lý tài
+khoản, khám phá nội dung, xem phim/series, xem video ngắn, theo dõi sự kiện thể thao và
+quản trị nội dung.
+
+Bên cạnh việc hoàn thiện sản phẩm về mặt chức năng, nhóm tập trung vào việc giải quyết
+các bài toán kỹ thuật thực tế trong lập trình di động:
+
+\begin{itemize}
+    \item Áp dụng kiến trúc client–server với REST API — Android client giao tiếp với
+    máy chủ Spring Boot qua giao thức HTTP, dữ liệu trao đổi dưới dạng JSON.
+
+    \item Tổ chức ứng dụng Android theo mô hình phân lớp (Layered Architecture) kết hợp
+    Repository Pattern, tách biệt rõ ràng tầng giao diện, tầng dữ liệu và tầng giao tiếp
+    mạng.
+
+    \item Xây dựng luồng xác thực không trạng thái dựa trên JSON Web Token, cho phép
+    duy trì phiên đăng nhập bền vững giữa các lần mở ứng dụng và tự động đính kèm chứng
+    chỉ xác thực vào mọi yêu cầu HTTP.
+
+    \item Tích hợp trình phát video chuyên dụng hỗ trợ định dạng streaming hiện đại, có
+    khả năng phát phim lẻ, series nhiều tập và sự kiện trực tiếp trong cùng một ứng dụng.
+
+    \item Thiết kế hệ thống phân quyền hai vai trò (người xem và quản trị viên) ngay
+    trong cùng một ứng dụng, với Admin Panel cho phép quản lý nội dung (CRUD phim, danh
+    mục, người dùng) và xem thống kê.
+\end{itemize}
+
+\subsubsection*{Phạm vi}
+
+Đồ án bao gồm hai nhóm người dùng: Người xem (User) và Quản trị viên (Admin), triển khai
+trên nền tảng Android. Ứng dụng cho iOS, phiên bản Web và Smart TV nằm ngoài phạm vi của
+đồ án này.
+
+
+% ────────────────────────────────────────────────────────────
+\section{Cơ sở lý thuyết}
+\label{sec:co_so_ly_thuyet}
+
+Để giải quyết các bài toán đặt ra, đồ án áp dụng một tập hợp các công nghệ và kiến trúc
+hiện đại trong lập trình di động và phát triển web. Phần này trình bày nền tảng lý thuyết
+của từng thành phần và lý do lựa chọn.
+
+% ── 2.1 Android & Java ──────────────────────────────────────
+\subsection{Nền tảng Android và ngôn ngữ Java}
+\label{subsec:android_java}
+
+Android là hệ điều hành di động phổ biến nhất thế giới, được phát triển bởi Google trên
+nền nhân Linux và máy ảo ART (Android Runtime). Một ứng dụng Android được tổ chức xoay
+quanh bốn thành phần chính: \textbf{Activity} (đại diện cho một màn hình), \textbf{Fragment}
+(một mảnh giao diện có thể tái sử dụng bên trong Activity), \textbf{Service} (xử lý nền)
+và \textbf{Broadcast Receiver} (lắng nghe sự kiện hệ thống).
+
+Đồ án sử dụng \textbf{Java 11} làm ngôn ngữ lập trình cho phía Android — vừa phù hợp với
+chương trình môn Lập trình di động, vừa tận dụng được hệ sinh thái thư viện Android Java
+đã rất trưởng thành. Ứng dụng được biên dịch với \texttt{compileSdk 36} và đặt mức
+\texttt{minSdk 24} (Android 7.0 Nougat), bao phủ phần lớn thiết bị Android đang hoạt động.
+
+% ── 2.2 Kiến trúc Client–Server ─────────────────────────────
+\subsection{Kiến trúc Client--Server và REST API}
+\label{subsec:client_server}
+
+Kiến trúc \textbf{Client--Server} phân chia hệ thống thành hai phần: phía khách (client)
+đảm nhận giao diện và tương tác người dùng, phía máy chủ (server) tập trung dữ liệu và
+logic nghiệp vụ. Hai phía giao tiếp với nhau qua mạng theo một giao thức thoả thuận
+trước — phổ biến nhất hiện nay là HTTP/HTTPS.
+
+Trên nền HTTP, \textbf{REST (Representational State Transfer)} là phong cách kiến trúc do
+Roy Fielding đề xuất, mô hình hoá mỗi thực thể nghiệp vụ thành một \textit{tài nguyên}
+được định danh bằng URL và thao tác qua các phương thức HTTP chuẩn (\texttt{GET},
+\texttt{POST}, \texttt{PUT}, \texttt{DELETE}). REST giúp API có cấu trúc dễ đoán, dễ tài
+liệu hoá và độc lập với ngôn ngữ ở hai phía.
+
+Trong CineFlow, toàn bộ tương tác giữa ứng dụng Android và máy chủ đều đi qua một tập các
+endpoint REST với tiền tố \texttt{/api/v1}, dữ liệu trao đổi dưới định dạng JSON và được
+bọc trong một bao chuẩn hoá (\texttt{success}, \texttt{message}, \texttt{data}) để tầng
+client xử lý lỗi thống nhất.
+
+% ── 2.3 Layered Architecture & Repository ───────────────────
+\subsection{Kiến trúc phân lớp và mẫu Repository}
+\label{subsec:layered_repository}
+
+\textbf{Layered Architecture} là một trong những mẫu kiến trúc lâu đời và phổ biến nhất:
+hệ thống được chia thành các tầng (layer) chồng lên nhau, mỗi tầng chỉ phụ thuộc vào tầng
+ngay bên dưới. Cách tổ chức này tối đa hoá tính tách rời (separation of concerns) và giúp
+việc thay đổi một tầng không lan rộng ra toàn bộ hệ thống.
+
+\textbf{Repository Pattern} là phần mở rộng đặc trưng của kiến trúc phân lớp, đóng vai
+trò là một lớp trung gian \textit{duy nhất} để tầng giao diện truy cập dữ liệu, ẩn đi
+nguồn gốc thật sự (mạng, cơ sở dữ liệu, cache). Nhờ Repository, các Fragment/Activity
+trên Android không cần biết dữ liệu đến từ Retrofit hay từ một cache nội bộ — chúng chỉ
+quan sát kết quả qua một luồng dữ liệu duy nhất.
+
+Trong CineFlow, ứng dụng Android được phân thành các tầng: \textit{UI} (Fragment,
+Activity, Adapter), \textit{Repository}, \textit{Network} (Retrofit + OkHttp) và
+\textit{Auth} (quản lý phiên đăng nhập). Phía backend Spring Boot tổ chức tương ứng theo
+ba tầng cổ điển: \textit{Controller} -- \textit{Service} -- \textit{Repository}.
+
+% ── 2.4 Lifecycle ───────────────────────────────────────────
+\subsection{Vòng đời (Lifecycle) trong Android}
+\label{subsec:lifecycle}
+
+Một trong những đặc thù khó nhất của lập trình Android là \textbf{vòng đời} của các thành
+phần giao diện có thể bị hệ điều hành can thiệp bất kỳ lúc nào — khi xoay màn hình, khi
+chuyển ứng dụng, hoặc khi hệ thống giải phóng bộ nhớ. Một Activity hay Fragment trải qua
+một chuỗi trạng thái xác định (\texttt{onCreate}, \texttt{onStart}, \texttt{onResume},
+\texttt{onPause}, \texttt{onStop}, \texttt{onDestroy}), và mã nguồn của lập trình viên
+phải tôn trọng chuỗi trạng thái này.
+
+Việc gọi mạng, đăng ký listener hay giữ tham chiếu View không đúng lifecycle là nguyên
+nhân hàng đầu của hai loại lỗi kinh điển trên Android: \textit{crash} (ví dụ
+\texttt{IllegalStateException} khi cập nhật UI sau khi Fragment đã bị huỷ) và \textit{rò
+rỉ bộ nhớ} (memory leak) khi callback bất đồng bộ giữ tham chiếu đến Activity đã chết.
+
+CineFlow giải quyết bài toán này bằng cách định nghĩa một lớp trừu tượng chuẩn hoá luồng
+khởi tạo cho mọi Fragment, đồng thời sử dụng \texttt{LiveData} để dữ liệu luôn được phát
+tới UI một cách \textit{lifecycle-aware} -- chỉ cập nhật khi UI thực sự đang hiển thị.
+
+% ── 2.5 HTTP Client (Retrofit + OkHttp) ─────────────────────
+\subsection{Giao tiếp HTTP với Retrofit và OkHttp}
+\label{subsec:retrofit_okhttp}
+
+\textbf{Retrofit} là thư viện HTTP client type-safe do Square phát triển, hoạt động theo
+phong cách \textit{declarative}: lập trình viên khai báo một interface Java với các
+phương thức được gắn annotation (\texttt{@GET}, \texttt{@POST}, \texttt{@Path},
+\texttt{@Body}); Retrofit sinh mã runtime để biến mỗi phương thức thành một lời gọi HTTP
+thực sự. Việc tuần tự hoá và giải tuần tự hoá JSON được uỷ thác cho \textbf{Gson}.
+
+Retrofit chạy trên nền \textbf{OkHttp} -- thư viện HTTP cấp thấp hỗ trợ HTTP/2,
+connection pooling, cache và đặc biệt là cơ chế \textbf{Interceptor} cho phép can thiệp
+vào mọi request/response. Đồ án tận dụng cơ chế Interceptor để cài đặt một bộ chặn xác
+thực: trước mỗi request, JWT của người dùng được tự động đính kèm vào header
+\texttt{Authorization} mà tầng nghiệp vụ không cần can thiệp.
+
+% ── 2.6 ExoPlayer (Media3) ──────────────────────────────────
+\subsection{Phát video trực tuyến với ExoPlayer (Media3)}
+\label{subsec:exoplayer}
+
+Thành phần \texttt{VideoView} mặc định của Android có nhiều hạn chế: không hỗ trợ
+streaming thích nghi, khó tuỳ biến giao diện và xử lý lỗi mạng kém. Đồ án lựa chọn
+\textbf{Media3 ExoPlayer} -- bộ thư viện chính thức của Google kế thừa và thay thế
+ExoPlayer truyền thống -- cung cấp một trình phát media mở rộng được, hiệu năng cao và
+phù hợp với các ứng dụng streaming chuyên nghiệp.
+
+ExoPlayer hỗ trợ các định dạng streaming hiện đại như \textbf{HLS} (HTTP Live Streaming)
+và \textbf{DASH} (Dynamic Adaptive Streaming over HTTP), tự động điều chỉnh chất lượng
+video theo băng thông thực tế (adaptive bitrate streaming), đồng thời cho phép tuỳ biến
+hoàn toàn giao diện điều khiển. Quan trọng hơn, ExoPlayer được thiết kế để tích hợp chặt
+với lifecycle của Activity, giúp giải phóng tài nguyên đúng thời điểm và tránh các lỗi
+rò rỉ bộ nhớ thường gặp khi phát video trên Android.
+
+% ── 2.7 Glide ───────────────────────────────────────────────
+\subsection{Tải và cache ảnh với Glide}
+\label{subsec:glide}
+
+Một ứng dụng xem phim có rất nhiều hình ảnh: banner trang chủ, poster phim, thumbnail
+tập phim, ảnh đại diện kênh thể thao\dots Tải ảnh trực tiếp trên luồng giao diện sẽ làm
+ứng dụng giật, đồng thời ảnh độ phân giải cao dễ gây tràn bộ nhớ (\texttt{OutOfMemoryError}).
+
+\textbf{Glide} là thư viện tải ảnh chuyên dụng cho Android, cung cấp ba khả năng cốt lõi:
+(1) tải ảnh bất đồng bộ với placeholder trong khi chờ, (2) cache hai cấp -- bộ nhớ và đĩa
+-- nhằm giảm tối đa số lượt tải lặp, (3) tự động cắt và biến đổi ảnh theo kích thước view
+đích để tránh OOM. Đặc biệt, Glide tự động huỷ tác vụ tải ảnh khi vòng đời của
+Fragment/Activity kết thúc, giúp tránh rò rỉ bộ nhớ một cách tự nhiên.
+
+% ── 2.8 ViewPager2 + BottomNavigationView ───────────────────
+\subsection{Điều hướng với ViewPager2 và BottomNavigationView}
+\label{subsec:navigation}
+
+Trải nghiệm điển hình của một ứng dụng streaming là các tab nội dung song song mà người
+dùng có thể chuyển qua lại nhanh chóng. CineFlow áp dụng mô hình \textbf{ViewPager2 +
+BottomNavigationView}: \texttt{ViewPager2} quản lý việc cuộn ngang giữa các Fragment với
+hiệu năng cao nhờ tái sử dụng view, còn \texttt{BottomNavigationView} hiển thị ở cạnh
+dưới làm điểm điều hướng cố định -- vừa trực quan, vừa tuân thủ chuẩn Material Design.
+
+Bên cạnh luồng tab chính, các luồng phụ (đăng nhập, đăng ký, chi tiết phim, phát video,
+quản trị) được triển khai bằng các \texttt{Activity} riêng và mở qua \texttt{Intent} --
+phù hợp với mô hình điều hướng nông (shallow navigation) thường thấy ở các ứng dụng giải
+trí.
+
+% ── 2.9 Material Design ─────────────────────────────────────
+\subsection{Hệ thống thiết kế Material Design}
+\label{subsec:material}
+
+\textbf{Material Design} là hệ thống thiết kế do Google phát triển, hiện đã tới phiên bản
+thứ ba (Material 3). Hệ thống này cung cấp một bộ quy tắc nhất quán về màu sắc, kiểu chữ,
+khoảng cách, độ nâng (elevation) và chuyển động, giúp các ứng dụng Android có ngôn ngữ
+hình ảnh thống nhất và quen thuộc với người dùng.
+
+CineFlow sử dụng chủ đề tối (dark theme) -- phù hợp với trải nghiệm xem phim -- và tổ
+chức màu sắc theo \textbf{design token}: các nhóm \textit{surface} (mặt nền), \textit{brand}
+(thương hiệu), \textit{text} (chữ) và \textit{status} (trạng thái) được khai báo trong
+\texttt{colors.xml} với tên có ngữ nghĩa rõ ràng. Quy ước trong toàn bộ dự án là layout
+XML luôn tham chiếu màu qua \texttt{@color/<tên>} thay vì mã hex cứng, đảm bảo có thể
+thay đổi theme tập trung mà không phải sửa hàng trăm file.
+
+% ── 2.10 Spring Boot ────────────────────────────────────────
+\subsection{Phát triển backend với Spring Boot}
+\label{subsec:springboot}
+
+\textbf{Spring Boot} là một framework phát triển ứng dụng Java do Pivotal (nay là VMware)
+phát triển, dựa trên Spring Framework. Spring Boot loại bỏ phần lớn cấu hình XML lặp lại
+của Spring truyền thống bằng cơ chế \textit{auto-configuration} -- framework tự động suy
+ra cấu hình hợp lý dựa trên các thư viện có trên classpath -- và \textit{embedded server}
+(Tomcat đóng gói sẵn) cho phép chạy ứng dụng web bằng một dòng lệnh duy nhất.
+
+Phía backend của CineFlow được xây dựng trên Spring Boot 3.5 (Java 17), tổ chức theo
+kiến trúc phân lớp ba tầng truyền thống: \textbf{Controller} (mở endpoint REST,
+validate dữ liệu vào), \textbf{Service} (chứa logic nghiệp vụ và transaction) và
+\textbf{Repository} (truy cập cơ sở dữ liệu qua Spring Data JPA). Bảo mật được uỷ thác
+cho mô-đun Spring Security.
+
+% ── 2.11 PostgreSQL + Flyway ────────────────────────────────
+\subsection{Cơ sở dữ liệu PostgreSQL và quản lý schema với Flyway}
+\label{subsec:postgres_flyway}
+
+\textbf{PostgreSQL} được lựa chọn làm hệ quản trị cơ sở dữ liệu quan hệ (RDBMS) chính cho
+backend. Lý do bao gồm: tính tuân thủ ACID nghiêm ngặt giúp đảm bảo toàn vẹn dữ liệu, hỗ
+trợ kiểu dữ liệu phong phú (UUID, JSONB, mảng), khả năng mở rộng tốt và là mã nguồn mở
+hoàn toàn.
+
+Trong môi trường phát triển nhiều người, một thách thức luôn xuất hiện là: làm sao đảm
+bảo schema cơ sở dữ liệu của tất cả thành viên luôn đồng bộ với mã nguồn? \textbf{Flyway}
+giải quyết vấn đề này bằng cách quản lý các bản di trú (migration) theo phiên bản. Mỗi
+thay đổi schema được lưu thành một file SQL có đánh số (\texttt{V1, V2, V3\dots}); khi
+ứng dụng khởi động, Flyway đối chiếu với bảng lịch sử \texttt{flyway\_schema\_history}
+và tự động áp dụng tuần tự các bản chưa chạy. Nhờ đó, schema luôn được kiểm soát giống
+như mã nguồn -- có lịch sử, có thể review và có thể tái lập lại trên mọi môi trường.
+
+% ── 2.12 JWT ────────────────────────────────────────────────
+\subsection{Xác thực không trạng thái với JSON Web Token}
+\label{subsec:jwt}
+
+\textbf{JSON Web Token (JWT)} là một tiêu chuẩn mở (RFC 7519) cho phép truyền thông tin
+xác thực dưới dạng một chuỗi gọn, đã được ký số. Một JWT gồm ba phần được phân tách bởi
+dấu chấm: \texttt{header.payload.signature}. Phần \textit{payload} chứa các thông tin
+nhận dạng người dùng (claims) như \texttt{userId}, \texttt{role}; phần \textit{signature}
+được sinh bằng thuật toán băm có khoá bí mật, đảm bảo token không bị giả mạo.
+
+Ưu điểm cốt lõi của JWT là tính \textbf{không trạng thái} (stateless): máy chủ chỉ cần
+khoá bí mật để xác thực, không cần lưu phiên (session) trong bộ nhớ hay cơ sở dữ liệu --
+rất phù hợp với REST API và các ứng dụng di động phải duy trì đăng nhập dài hạn.
+
+Trong CineFlow, sau khi đăng nhập thành công, máy chủ trả về một JWT có thời hạn 2 giờ;
+ứng dụng Android lưu token này vào bộ nhớ riêng và đính kèm vào header \texttt{Authorization}
+ở mọi request tiếp theo. Mật khẩu người dùng ở phía máy chủ được băm bằng \textbf{BCrypt}
+-- thuật toán băm chậm có salt nội tại, chống lại các tấn công brute-force và rainbow
+table.

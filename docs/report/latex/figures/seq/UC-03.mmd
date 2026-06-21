@@ -1,0 +1,25 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant FA as ForgotPasswordActivity
+    participant API as AuthController
+    participant SVC as AuthService
+    participant ES as EmailService
+    participant SMTP as Email Server
+    participant DB as PostgreSQL
+
+    U->>FA: Nhập email
+    FA->>API: POST /auth/forgot-password
+    API->>SVC: forgotPassword(email)
+    SVC->>DB: SELECT user by email
+    DB-->>SVC: User (hoặc null)
+    alt User tồn tại
+        SVC->>SVC: Sinh resetToken (30 phút)
+        SVC->>DB: INSERT reset_token
+        SVC->>ES: sendResetEmail(email, link)
+        ES->>SMTP: SMTP send
+        SMTP-->>ES: 250 OK
+    end
+    SVC-->>API: 200 OK (luôn)
+    API-->>FA: ApiResponse OK
+    FA-->>U: Báo "Vui lòng kiểm tra email"

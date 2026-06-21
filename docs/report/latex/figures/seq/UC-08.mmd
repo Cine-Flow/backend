@@ -1,0 +1,18 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant FD as FilmDetailActivity
+    participant PA as PlayerActivity
+    participant EP as ExoPlayer
+    participant CDN as Video URL
+
+    U->>FD: Bấm Play trên Episode
+    FD->>PA: Intent (videoUrl, title)
+    PA->>EP: setMediaItem(videoUrl)
+    PA->>EP: prepare()
+    EP->>CDN: HTTP/HLS GET
+    CDN-->>EP: Video segments
+    EP-->>PA: onPlaybackStateChanged READY
+    PA->>EP: play()
+    EP-->>U: Video phát
+    Note over PA: onDestroy() -> EP.release()

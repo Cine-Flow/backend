@@ -1,0 +1,23 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant LA as LoginActivity
+    participant API as AuthController
+    participant SVC as AuthService
+    participant JWT as JwtUtils
+    participant AM as AuthManager
+    participant DB as PostgreSQL
+
+    U->>LA: Nhập username + password
+    LA->>API: POST /auth/login
+    API->>SVC: login(request)
+    SVC->>DB: SELECT user
+    DB-->>SVC: User entity
+    SVC->>SVC: BCrypt.matches(password)
+    SVC->>JWT: generateToken(userId, role)
+    JWT-->>SVC: JWT (2h)
+    SVC-->>API: { token, user }
+    API-->>LA: 200 ApiResponse OK
+    LA->>AM: saveSession()
+    AM-->>LA: SharedPreferences saved
+    LA-->>U: Quay về MainActivity

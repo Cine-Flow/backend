@@ -1,0 +1,20 @@
+%%{init: {"theme": "default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant FD as FilmDetailActivity
+    participant API as Backend API
+    participant PA as PlayerActivity
+    participant EP as ExoPlayer
+    participant CDN as Nguồn Video (URL)
+
+    U->>FD: Bấm vào tập / phim
+    FD->>API: GET /films/{id}
+    API-->>FD: Film + danh sách Episode (kèm videoUrl)
+    FD->>PA: Intent với videoUrl
+    PA->>EP: setMediaItem(videoUrl)
+    EP->>CDN: HTTP/HLS GET (streaming)
+    CDN-->>EP: Video segments
+    EP-->>PA: onPlaybackStateChanged READY
+    PA-->>U: Bắt đầu phát video
+
+    Note over EP,CDN: Streaming trực tiếp,<br/>backend không tham gia luồng video

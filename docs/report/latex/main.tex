@@ -1,0 +1,163 @@
+% ============================================================
+%  BÁO CÁO ĐỒ ÁN MÔN LẬP TRÌNH DI ĐỘNG – CINEFLOW
+%  Engine: XeLaTeX (tốt nhất cho tiếng Việt + Unicode)
+%  Compile: xelatex main.tex
+% ============================================================
+\documentclass[12pt, a4paper, oneside]{report}
+
+% ── Font & Ngôn ngữ ─────────────────────────────────────────
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{vietnamese}
+% TeX Gyre fonts — tương đương Times/Arial/Courier, có sẵn trong TeXLive
+\setmainfont{TeX Gyre Termes}
+\setsansfont{Arial}
+\setmonofont[Scale=0.9]{TeX Gyre Cursor}
+
+% ── Căn lề chuẩn A4 học thuật ───────────────────────────────
+\usepackage[
+  a4paper,
+  top=3cm, bottom=3cm,
+  left=3.5cm, right=2cm,
+  headheight=16pt
+]{geometry}
+
+% ── Dòng kẻ & Căn chỉnh ─────────────────────────────────────
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{indentfirst}
+\setlength{\parindent}{1.27cm}
+\setlength{\parskip}{6pt}
+
+% ── Header / Footer ─────────────────────────────────────────
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{Học viện Công nghệ Bưu chính Viễn thông}}
+\fancyhead[R]{\small\textit{\leftmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── Tiêu đề chương – viết hoa, căn giữa ────────────────────
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\Large\bfseries\centering}
+  {CHƯƠNG \thechapter}{0pt}{\Large\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
+
+% ── Đánh số theo chương ─────────────────────────────────────
+\usepackage{chngcntr}
+\counterwithin{figure}{chapter}
+\counterwithin{table}{chapter}
+\counterwithin{equation}{chapter}
+
+% ── Hình ảnh & Bảng ─────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{tabularx}
+\graphicspath{{figures/}}
+\usepackage{float}
+\usepackage{caption}
+\captionsetup{
+  font=small,
+  labelfont=bf,
+  labelsep=period
+}
+\usepackage{subcaption}
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+
+% ── Code listing ─────────────────────────────────────────────
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\definecolor{codegray}{rgb}{0.95,0.95,0.95}
+\definecolor{codeblue}{rgb}{0.0,0.3,0.6}
+\lstset{
+  backgroundcolor=\color{codegray},
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  keywordstyle=\color{codeblue}\bfseries,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  showstringspaces=false,
+  captionpos=b
+}
+
+% ── Toán học ─────────────────────────────────────────────────
+\usepackage{amsmath, amssymb}
+
+% ── Hyperlink & PDF metadata ─────────────────────────────────
+\usepackage[
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue,
+  pdfencoding=auto,
+  unicode=true
+]{hyperref}
+\usepackage{bookmark}
+
+% ── Tài liệu tham khảo ──────────────────────────────────────
+\usepackage[
+  backend=biber,
+  style=numeric,
+  sorting=none
+]{biblatex}
+\DeclareLanguageMapping{vietnamese}{english}
+\addbibresource{appendix/tai_lieu_tham_khao.bib}
+
+% ── Tiện ích khác ────────────────────────────────────────────
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{tocbibind}
+\usepackage{tocloft}
+
+\setlength{\cftbeforechapskip}{6pt}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftchappagefont}{\bfseries}
+
+% ── Lệnh tiện ích nội bộ ─────────────────────────────────────
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+\newcommand{\placeholder}[1]{\textcolor{gray}{\textit{[#1]}}}
+
+% ============================================================
+\begin{document}
+
+% ── Trang bìa (bổ sung sau) ─────────────────────────────────
+% \input{cover/00_bia}
+% \cleardoublepage
+
+% ── Mục lục ─────────────────────────────────────────────────
+\tableofcontents
+\cleardoublepage
+
+\listoffigures
+\cleardoublepage
+
+\listoftables
+\cleardoublepage
+
+% ── Nội dung chính ──────────────────────────────────────────
+\input{chapters/01_tong_quan}
+\input{chapters/02_thiet_ke}
+\input{chapters/03_trien_khai}
+\input{chapters/04_ket_luan}
+
+% ── Tài liệu tham khảo ──────────────────────────────────────
+\nocite{*}
+\printbibliography[heading=bibintoc, title={TÀI LIỆU THAM KHẢO}]
+
+% ── Phụ lục ─────────────────────────────────────────────────
+\appendix
+\input{appendix/phan_cong_cong_viec}
+
+\end{document}

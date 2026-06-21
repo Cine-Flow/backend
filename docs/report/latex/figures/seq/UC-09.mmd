@@ -1,0 +1,21 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant SF as ShortsFragment
+    participant API as ShortsController
+    participant SVC as ShortsService
+    participant DB as PostgreSQL
+    participant EP as ExoPlayer
+
+    U->>SF: Mở tab Shorts
+    SF->>API: GET /films/shorts
+    API->>SVC: getShorts()
+    SVC->>DB: SELECT shorts
+    DB-->>SVC: Danh sách
+    SVC-->>API: List<ShortsResponse>
+    API-->>SF: ApiResponse OK
+    SF->>SF: Gắn ViewPager2 dọc
+    U->>SF: Cuộn xuống item kế tiếp
+    SF->>EP: pause(currentVideo)
+    SF->>EP: play(nextVideo)
+    EP-->>U: Phát video mới

@@ -1,0 +1,44 @@
+%%{init: {"theme": "default", "themeVariables": {"fontSize": "14px"}}}%%
+flowchart LR
+    User((Người xem))
+    Admin((Quản trị viên))
+    Email((Email Server))
+
+    subgraph CineFlow["Ứng dụng CineFlow"]
+        UC1[UC-01 Đăng ký]
+        UC2[UC-02 Đăng nhập]
+        UC3[UC-03 Quên mật khẩu]
+        UC4[UC-04 Đặt lại mật khẩu]
+        UC5[UC-05 Đăng xuất]
+        UC6[UC-06 Xem trang chủ]
+        UC7[UC-07 Xem chi tiết phim]
+        UC8[UC-08 Phát video]
+        UC9[UC-09 Xem Shorts]
+        UC10[UC-10 Lịch Premier League]
+        UC11[UC-11 Dashboard quản trị]
+        UC12[UC-12 Tạo phim]
+        UC13[UC-13 Cập nhật phim]
+        UC14[UC-14 Xoá phim]
+        UC15[UC-15 Quản lý danh mục]
+    end
+
+    User --- UC1
+    User --- UC2
+    User --- UC3
+    User --- UC4
+    User --- UC5
+    User --- UC6
+    User --- UC7
+    User --- UC8
+    User --- UC9
+    User --- UC10
+
+    Admin --- UC2
+    Admin --- UC5
+    Admin --- UC11
+    Admin --- UC12
+    Admin --- UC13
+    Admin --- UC14
+    Admin --- UC15
+
+    UC3 --- Email

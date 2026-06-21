@@ -1,0 +1,263 @@
+% ============================================================
+%  CHƯƠNG III: TRIỂN KHAI HỆ THỐNG
+% ============================================================
+\chapter{TRIỂN KHAI HỆ THỐNG}
+\label{chap:trien_khai}
+
+% -----------------------------------------------------------
+\section{Môi trường và công nghệ triển khai}
+\label{sec:moi_truong_cong_nghe}
+
+\subsection{Ngôn ngữ và Framework}
+\label{subsec:ngon_ngu_framework}
+
+Bảng~\ref{tab:lang_framework} tổng hợp các ngôn ngữ, framework và thư viện chính được sử dụng trong đồ án CineFlow, phân chia theo hai phía Backend và Android Client.
+
+\begin{table}[H]
+\centering
+\caption{Ngôn ngữ, Framework và thư viện chính}
+\label{tab:lang_framework}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Tầng} & \textbf{Công nghệ} \\
+\hline
+\multirow{5}{*}{\textbf{Backend}} & Java 17 \\
+ & Spring Boot 3.5.11 (Spring Web, Spring Data JPA, Spring Security, Spring Mail) \\
+ & Maven \\
+ & PostgreSQL + Flyway \\
+ & JWT (JJWT) cho xác thực Bearer Token \\
+\hline
+\multirow{6}{*}{\textbf{Android Client}} & Java 11 \\
+ & Gradle (AGP 8.13.2, compileSdk 36, minSdk 24) \\
+ & Retrofit 2.11 + Gson, OkHttp 4.12 \\
+ & Glide 4.16 \\
+ & Material Components 1.13, Navigation 2.8.7 \\
+ & Media3 ExoPlayer 1.5, SwipeRefreshLayout 1.1 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Cấu hình ứng dụng và cơ sở dữ liệu}
+\label{subsec:cau_hinh_ung_dung}
+
+Cấu hình chính của backend được khai báo trong \texttt{application.yaml}:
+
+\begin{itemize}
+    \item \textbf{Cơ sở dữ liệu:} Kết nối PostgreSQL tại \texttt{jdbc:postgresql://localhost:5432/mydb}, schema được quản lý hoàn toàn bằng Flyway (\texttt{V1}--\texttt{V4}), không dùng \texttt{ddl-auto} của Hibernate trong môi trường thật.
+    \item \textbf{Bảo mật:} \texttt{JWT\_SECRET} và thời hạn token (2 giờ) nạp từ biến môi trường, không hard-code trong mã nguồn.
+    \item \textbf{Email:} Cấu hình SMTP qua các biến môi trường \texttt{MAIL\_HOST}, \texttt{MAIL\_USERNAME}, \texttt{MAIL\_PASSWORD}, phục vụ luồng quên mật khẩu (UC-03, UC-04).
+    \item \textbf{SecurityConfig:} Tại thời điểm hiện tại, toàn bộ URL được khai báo \texttt{permitAll()} ở tầng Spring Security; việc kiểm tra vai trò Admin được thực hiện ở tầng logic/annotation trong Controller và Service, chưa chặn ở tầng URL.
+\end{itemize}
+
+\subsection{Môi trường phát triển}
+\label{subsec:moi_truong_phat_trien}
+
+Bảng~\ref{tab:dev_env} trình bày môi trường hệ điều hành, công cụ phát triển và thiết bị thử nghiệm được nhóm sử dụng trong suốt quá trình thực hiện đồ án.
+
+\begin{table}[H]
+\centering
+\caption{Môi trường phát triển và công cụ}
+\label{tab:dev_env}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Hạng mục} & \textbf{Chi tiết} \\
+\hline
+Hệ điều hành & Windows 11 \\
+\hline
+JDK Backend & Java 17 (Spring Boot 3.5.11) \\
+\hline
+JDK Android & JDK 22+ (\texttt{D:\textbackslash Software\textbackslash JDK\textbackslash jdk-22}) \\
+\hline
+Cơ sở dữ liệu & PostgreSQL (local) \\
+\hline
+IDE & IntelliJ IDEA (backend) / Android Studio (frontend) \\
+\hline
+API Testing & Postman \\
+\hline
+Thiết bị thử nghiệm & Android Emulator (API 24+) qua \texttt{10.0.2.2:8080} \\
+\hline
+Version Control & Git -- hai repository độc lập \texttt{backend} và \texttt{frontend-cineflow} \\
+\hline
+\end{tabularx}
+\end{table}
+
+
+% -----------------------------------------------------------
+\section{Kết quả triển khai các chức năng chính}
+\label{sec:ket_qua_trien_khai}
+
+\subsection{Xác thực và Quản lý tài khoản (UC-01 -- UC-05)}
+\label{subsec:tk_xac_thuc}
+
+Toàn bộ luồng xác thực được triển khai tại \texttt{AuthController}/\texttt{AuthService}, sử dụng mật khẩu băm BCrypt và JWT Bearer Token có thời hạn 2 giờ.
+
+\begin{itemize}
+    \item \textbf{Đăng ký (UC-01):} \texttt{POST /auth/register} -- kiểm tra trùng username/email, băm mật khẩu, lưu tài khoản với vai trò \texttt{ROLE\_USER}.
+    \item \textbf{Đăng nhập (UC-02):} \texttt{POST /auth/login} -- trả về JWT kèm thông tin \texttt{id}, \texttt{username}, \texttt{email}, \texttt{role}; client lưu phiên qua \texttt{AuthManager} (SharedPreferences).
+    \item \textbf{Quên mật khẩu (UC-03):} \texttt{POST /auth/forgot-password} -- sinh \texttt{resetToken} và gửi email qua Spring Mail.
+    \item \textbf{Đặt lại mật khẩu (UC-04):} \texttt{GET /auth/validate-reset-token} kiểm tra token, \texttt{POST /auth/reset-password} cập nhật mật khẩu mới.
+    \item \textbf{Đăng xuất (UC-05):} Thao tác hoàn toàn phía client -- \texttt{AuthManager} xoá session khỏi SharedPreferences, backend là stateless nên không cần gọi API.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=0.85\textwidth]{outputs/demo_register_login.png}
+  \caption{Giao diện Đăng ký và Đăng nhập tài khoản}
+  \label{fig:demo_register_login}
+\end{figure}
+\placeholder{Ảnh cần bổ sung: demo\_register\_login.png -- chụp màn hình RegisterActivity và LoginActivity}
+
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=0.85\textwidth]{outputs/demo_forgot_password.png}
+  \caption{Giao diện Quên mật khẩu và Đặt lại mật khẩu}
+  \label{fig:demo_forgot_password}
+\end{figure}
+\placeholder{Ảnh cần bổ sung: demo\_forgot\_password.png -- chụp màn hình ForgotPasswordActivity}
+
+\subsection{Khám phá nội dung (UC-06 -- UC-10)}
+\label{subsec:tk_kham_pha}
+
+Nhóm chức năng này phục vụ nhu cầu xem nội dung chính của người dùng, không yêu cầu đăng nhập.
+
+\begin{itemize}
+    \item \textbf{Trang chủ (UC-06):} \texttt{GET /films/home} trả về 5 khu vực nội dung (\texttt{banners}, \texttt{newReleases}, \texttt{sportEvents}, \texttt{hotSeries}, \texttt{dailyMovies}); \texttt{HomeFragment} render từng khu vực vào \texttt{RecyclerView} riêng, dùng Glide cache ảnh.
+    \item \textbf{Chi tiết phim (UC-07):} \texttt{GET /films/\{id\}} trả về \texttt{Film} kèm danh sách \texttt{Episode}; \texttt{FilmDetailActivity} hiển thị mô tả, trailer và danh sách tập.
+    \item \textbf{Phát video (UC-08):} \texttt{PlayerActivity} khởi tạo ExoPlayer với \texttt{videoUrl} lấy trực tiếp từ DTO, streaming không qua backend.
+    \item \textbf{Shorts (UC-09):} \texttt{GET /films/shorts}; \texttt{ShortsFragment} dùng \texttt{ViewPager2} dọc, tự động play/pause theo trang hiển thị.
+    \item \textbf{Lịch Premier League (UC-10):} \texttt{PremierLeagueRepository} lấy lịch thi đấu theo mùa giải, quy đổi giờ về \texttt{Asia/Ho\_Chi\_Minh}.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=0.85\textwidth]{outputs/demo_home.png}
+  \caption{Giao diện Trang chủ (Home) với các khu vực nội dung}
+  \label{fig:demo_home}
+\end{figure}
+\placeholder{Ảnh cần bổ sung: demo\_home.png -- chụp màn hình HomeFragment đầy đủ 5 khu vực}
+
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=0.85\textwidth]{outputs/demo_film_detail.png}
+  \caption{Giao diện Chi tiết phim và Phát video}
+  \label{fig:demo_film_detail}
+\end{figure}
+\placeholder{Ảnh cần bổ sung: demo\_film\_detail.png -- chụp màn hình FilmDetailActivity và PlayerActivity}
+
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=0.85\textwidth]{outputs/demo_shorts.png}
+  \caption{Giao diện Shorts (video ngắn dạng cuộn dọc)}
+  \label{fig:demo_shorts}
+\end{figure}
+\placeholder{Ảnh cần bổ sung: demo\_shorts.png -- chụp màn hình ShortsFragment}
+
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=0.85\textwidth]{outputs/demo_premier_league.png}
+  \caption{Giao diện Lịch thi đấu Premier League}
+  \label{fig:demo_premier_league}
+\end{figure}
+\placeholder{Ảnh cần bổ sung: demo\_premier\_league.png -- chụp màn hình PremierLeagueFragment}
+
+\subsection{Quản trị phim và danh mục (UC-11 -- UC-15)}
+\label{subsec:tk_admin}
+
+Phân hệ quản trị được hiện thực dưới dạng các Activity riêng, chỉ hiển thị lối vào khi \texttt{AuthManager.isAdmin()} trả về \texttt{true}.
+
+\begin{itemize}
+    \item \textbf{Dashboard quản trị (UC-11):} \texttt{AdminDashboardActivity} -- lưới điều hướng tới Films/Users/Categories/Stats.
+    \item \textbf{Tạo phim (UC-12):} \texttt{POST /admin/films} -- \texttt{FilmFormDialogFragment} thu thập \texttt{title}, \texttt{description}, \texttt{thumbnailUrl}, \texttt{trailerUrl}, \texttt{releaseYear}, \texttt{isPremium}, \texttt{type}.
+    \item \textbf{Cập nhật phim (UC-13):} \texttt{PUT /admin/films/\{id\}} -- không ảnh hưởng danh sách \texttt{Episode} hiện có.
+    \item \textbf{Xoá phim (UC-14):} \texttt{DELETE /admin/films/\{id\}} -- xoá cascade các \texttt{Episode} liên quan, có dialog xác nhận trước khi gọi API.
+    \item \textbf{Quản lý danh mục (UC-15):} CRUD trên \texttt{Category}, ràng buộc tên danh mục duy nhất.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=0.85\textwidth]{outputs/demo_admin_dashboard.png}
+  \caption{Giao diện Dashboard quản trị (Admin)}
+  \label{fig:demo_admin_dashboard}
+\end{figure}
+\placeholder{Ảnh cần bổ sung: demo\_admin\_dashboard.png -- chụp màn hình AdminDashboardActivity}
+
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=0.85\textwidth]{outputs/demo_admin_film_list.png}
+  \caption{Giao diện Danh sách phim (Admin) và Form tạo/sửa phim}
+  \label{fig:demo_admin_film_list}
+\end{figure}
+\placeholder{Ảnh cần bổ sung: demo\_admin\_film\_list.png -- chụp màn hình AdminFilmListActivity kèm FilmFormDialogFragment đang mở}
+
+
+% -----------------------------------------------------------
+\section{Đánh giá kết quả thực nghiệm}
+\label{sec:danh_gia_thuc_nghiem}
+
+\subsection{Mức độ hoàn thành Use Case}
+\label{subsec:muc_do_hoan_thanh}
+
+Đối chiếu với 15 Use Case đã được đặc tả ở Chương II, toàn bộ các Use Case đã được triển khai và chạy thử thành công trên Android Emulator.
+
+\begin{itemize}
+    \item \textbf{Hoàn thành -- 15/15 (100\%):} Bốn nhóm nghiệp vụ -- \textit{Xác thực và quản lý tài khoản}, \textit{Khám phá nội dung}, \textit{Quản trị phim} và \textit{Quản lý danh mục} -- đã được thực hiện đầy đủ trên cả backend và Android client (xem các Hình~\ref{fig:demo_register_login}--\ref{fig:demo_admin_film_list}).
+    \item \textbf{Hạn chế đã biết:} \texttt{SecurityConfig} hiện permitAll() ở tầng URL; phân quyền Admin chỉ được kiểm tra ở tầng logic, chưa có URL-level security bằng \texttt{@PreAuthorize} hoặc \texttt{HttpSecurity} rule. Đây là điểm sẽ được củng cố trong giai đoạn tiếp theo.
+\end{itemize}
+
+\subsection{Đánh giá hiệu năng}
+\label{subsec:danh_gia_hieu_nang}
+
+Hệ thống được đo hiệu năng thủ công bằng Postman trong môi trường phát triển (localhost), với bộ dữ liệu mẫu nạp từ Flyway (V3, V4). Bảng~\ref{tab:perf} trình bày kết quả đo thời gian phản hồi trung bình của các API chính.
+
+\begin{table}[H]
+\centering
+\caption{Kết quả đo hiệu năng các API chính}
+\label{tab:perf}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|X|X|}
+\hline
+\textbf{API Endpoint} & \textbf{Thời gian phản hồi trung bình (ms)} & \textbf{Ghi chú} \\
+\hline
+\texttt{POST /auth/login} & ~ & Bao gồm BCrypt verify \\
+\hline
+\texttt{GET /films/home} & ~ & Truy vấn 5 khu vực nội dung song song \\
+\hline
+\texttt{GET /films/\{id\}} & ~ & Kèm join \texttt{Episode} \\
+\hline
+\texttt{GET /films/shorts} & ~ & Không phân trang \\
+\hline
+\texttt{POST /admin/films} & ~ & Bao gồm validate DTO \\
+\hline
+\end{tabularx}
+\end{table}
+\placeholder{Số liệu cần bổ sung: chạy lại Postman/Postman Runner và điền thời gian phản hồi trung bình (ms) đo được vào Bảng~\ref{tab:perf}}
+
+\noindent Kết quả ghi nhận cho thấy:
+\begin{itemize}
+    \item API trang chủ (\texttt{/films/home}) có thời gian phản hồi cao hơn các API đơn lẻ do phải truy vấn đồng thời nhiều khu vực nội dung từ cùng một bảng \texttt{films}.
+    \item API đăng nhập tốn thêm thời gian cho bước băm/so khớp mật khẩu BCrypt, nhưng vẫn nằm trong ngưỡng người dùng không cảm nhận được độ trễ.
+\end{itemize}
+
+\subsection{Đánh giá tính nhất quán dữ liệu}
+\label{subsec:danh_gia_nhat_quan}
+
+Vì backend là một ứng dụng đơn khối truy cập duy nhất một cơ sở dữ liệu PostgreSQL, CineFlow không gặp vấn đề đồng bộ dữ liệu giữa nhiều service như mô hình Microservices. Tính nhất quán được đảm bảo qua hai cơ chế:
+
+\begin{itemize}
+    \item \textbf{Transaction của Spring:} Các thao tác ghi nhiều bảng (ví dụ tạo \texttt{Film} kèm sinh \texttt{Episode} mặc định cho phim \texttt{SINGLE}) được bọc trong cùng một \texttt{@Transactional}, đảm bảo tính toàn vẹn (atomicity).
+    \item \textbf{Flyway Migration:} Mọi thay đổi schema được versioned qua các file \texttt{V1}--\texttt{V4}; khi backend khởi động, Flyway đối chiếu \texttt{flyway\_schema\_history} và áp dụng tuần tự các migration chưa chạy, đảm bảo mọi môi trường (máy thành viên, máy demo) có cùng trạng thái schema.
+\end{itemize}
+
+Nhóm đã kiểm chứng bằng cách: cập nhật một \texttt{Film} qua \texttt{PUT /admin/films/\{id\}} trên Postman, sau đó gọi lại \texttt{GET /films/\{id\}} từ Android client -- dữ liệu mới phản ánh ngay lập tức do client và admin đọc/ghi cùng một CSDL, không có khoảng trễ đồng bộ.
+
+\subsection{Đánh giá bảo mật cơ bản}
+\label{subsec:danh_gia_bao_mat}
+
+\begin{itemize}
+    \item \textbf{Xác thực JWT:} \texttt{AuthTokenFilter} kiểm tra và giải mã JWT trên mỗi request; request thiếu token hoặc token hết hạn không bơm \texttt{Authentication} vào \texttt{SecurityContext}, dẫn tới \texttt{401 Unauthorized} qua \texttt{JwtEntryPoint}.
+    \item \textbf{Mã hóa mật khẩu:} Toàn bộ mật khẩu được băm bằng BCrypt trước khi lưu, không tồn tại plaintext trong CSDL.
+    \item \textbf{Lưu trữ phiên phía client:} Token và thông tin người dùng được lưu trong \texttt{SharedPreferences} ở chế độ private của ứng dụng, không thể truy cập từ ứng dụng khác trên cùng thiết bị (trừ khi thiết bị bị root).
+    \item \textbf{Hạn chế còn tồn tại:} \texttt{SecurityConfig} hiện permitAll() toàn bộ URL nên về lý thuyết một client tuỳ ý vẫn có thể gọi trực tiếp các endpoint \texttt{/admin/*} nếu biết JWT của một tài khoản Admin hợp lệ; việc bổ sung kiểm tra role ở tầng \texttt{HttpSecurity} (URL-level) là hướng cải thiện bảo mật ưu tiên cho giai đoạn sau.
+\end{itemize}

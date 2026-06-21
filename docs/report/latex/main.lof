@@ -1,0 +1,34 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Use Case Tổng quát của ứng dụng CineFlow}}{12}{figure.caption.5}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Thực thể Liên kết (ERD) của hệ thống CineFlow}}{26}{figure.caption.23}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-01 Đăng ký tài khoản}}{27}{figure.caption.24}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-02 Đăng nhập hệ thống}}{28}{figure.caption.25}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-03 Quên mật khẩu}}{28}{figure.caption.26}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-04 Đặt lại mật khẩu}}{29}{figure.caption.27}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-05 Đăng xuất}}{29}{figure.caption.28}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-06 Xem trang chủ}}{30}{figure.caption.29}%
+\contentsline {figure}{\numberline {2.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-07 Xem chi tiết phim}}{30}{figure.caption.30}%
+\contentsline {figure}{\numberline {2.10}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-08 Phát video}}{31}{figure.caption.31}%
+\contentsline {figure}{\numberline {2.11}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-09 Xem video ngắn}}{31}{figure.caption.32}%
+\contentsline {figure}{\numberline {2.12}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-10 Xem lịch Premier League}}{32}{figure.caption.33}%
+\contentsline {figure}{\numberline {2.13}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-11 Xem Dashboard quản trị}}{32}{figure.caption.34}%
+\contentsline {figure}{\numberline {2.14}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-12 Tạo phim mới}}{33}{figure.caption.35}%
+\contentsline {figure}{\numberline {2.15}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-13 Cập nhật phim}}{33}{figure.caption.36}%
+\contentsline {figure}{\numberline {2.16}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-14 Xoá phim}}{34}{figure.caption.37}%
+\contentsline {figure}{\numberline {2.17}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự: UC-15 Quản lý danh mục thể loại}}{34}{figure.caption.38}%
+\contentsline {figure}{\numberline {2.18}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Kiến trúc Tổng thể của hệ thống CineFlow}}{36}{figure.caption.39}%
+\contentsline {figure}{\numberline {2.19}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự minh hoạ luồng đăng nhập và đính kèm JWT}}{37}{figure.caption.42}%
+\contentsline {figure}{\numberline {2.20}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Tuần tự minh hoạ luồng phát video streaming}}{38}{figure.caption.44}%
+\contentsline {figure}{\numberline {2.21}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Sơ đồ Triển khai (Deployment Diagram) các Node và Phân vùng mạng}}{41}{figure.caption.58}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Giao diện Đăng ký và Đăng nhập tài khoản}}{45}{figure.caption.61}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Giao diện Quên mật khẩu và Đặt lại mật khẩu}}{45}{figure.caption.62}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Giao diện Trang chủ (Home) với các khu vực nội dung}}{46}{figure.caption.63}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Giao diện Chi tiết phim và Phát video}}{46}{figure.caption.64}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Giao diện Shorts (video ngắn dạng cuộn dọc)}}{46}{figure.caption.65}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Giao diện Lịch thi đấu Premier League}}{46}{figure.caption.66}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Giao diện Dashboard quản trị (Admin)}}{47}{figure.caption.67}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Giao diện Danh sách phim (Admin) và Form tạo/sửa phim}}{47}{figure.caption.68}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }

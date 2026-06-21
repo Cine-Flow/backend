@@ -1,0 +1,72 @@
+%%{init: {"theme": "default"}}%%
+erDiagram
+    USER {
+        bigint id PK
+        varchar username UK
+        varchar email UK
+        varchar password
+        varchar role
+        timestamp created_at
+    }
+    SUBSCRIPTION_PACKAGE {
+        bigint id PK
+        varchar name
+        int duration_days
+        decimal price
+    }
+    USER_SUBSCRIPTION {
+        bigint id PK
+        bigint user_id FK
+        bigint package_id FK
+        varchar status
+        timestamp start_at
+        timestamp expire_at
+    }
+    FILM {
+        bigint id PK
+        varchar title
+        text description
+        varchar thumbnail_url
+        varchar trailer_url
+        int release_year
+        boolean is_premium
+        varchar type
+    }
+    EPISODE {
+        bigint id PK
+        bigint film_id FK
+        int episode_number
+        varchar title
+        varchar video_url
+    }
+    CATEGORY {
+        bigint id PK
+        varchar name UK
+    }
+    FILM_CATEGORY {
+        bigint film_id PK,FK
+        bigint category_id PK,FK
+    }
+    FAVORITE {
+        bigint id PK
+        bigint user_id FK
+        bigint film_id FK
+        timestamp created_at
+    }
+    WATCH_HISTORY {
+        bigint id PK
+        bigint user_id FK
+        bigint episode_id FK
+        int progress_seconds
+        timestamp updated_at
+    }
+
+    USER ||--o{ USER_SUBSCRIPTION : has
+    SUBSCRIPTION_PACKAGE ||--o{ USER_SUBSCRIPTION : selected_by
+    FILM ||--o{ EPISODE : contains
+    FILM ||--o{ FILM_CATEGORY : in
+    CATEGORY ||--o{ FILM_CATEGORY : groups
+    USER ||--o{ FAVORITE : marks
+    FILM ||--o{ FAVORITE : marked_by
+    USER ||--o{ WATCH_HISTORY : watches
+    EPISODE ||--o{ WATCH_HISTORY : watched_in

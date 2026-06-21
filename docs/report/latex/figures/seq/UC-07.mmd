@@ -1,0 +1,19 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant HF as HomeFragment
+    participant FD as FilmDetailActivity
+    participant API as FilmController
+    participant SVC as FilmService
+    participant DB as PostgreSQL
+
+    U->>HF: Bấm vào item phim
+    HF->>FD: Intent (filmId)
+    FD->>API: GET /films/{id}
+    API->>SVC: getFilmDetail(id)
+    SVC->>DB: SELECT film + episodes + categories
+    DB-->>SVC: Film entity
+    SVC-->>API: FilmDetailResponse
+    API-->>FD: ApiResponse OK
+    FD->>FD: Render thumbnail, mô tả, danh sách tập
+    FD-->>U: Hiển thị chi tiết

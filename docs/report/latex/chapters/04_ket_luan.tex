@@ -1,0 +1,74 @@
+% ============================================================
+%  CHƯƠNG IV: KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN
+% ============================================================
+\chapter{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}
+\label{chap:ket_luan}
+
+% ────────────────────────────────────────────────────────────
+\section{Những kết quả đã đạt được}
+\label{sec:ket_qua_dat_duoc}
+
+Sau thời gian nghiên cứu và phát triển, ứng dụng CineFlow đã cơ bản hoàn thiện và đáp ứng được các mục tiêu cốt lõi đặt ra ở Chương I cũng như tuân thủ các nguyên tắc thiết kế đã trình bày ở Chương II. Bảng~\ref{tab:ket_qua_doi_chieu} dưới đây đối chiếu trực tiếp giữa mục tiêu ban đầu và kết quả thực tế đạt được:
+
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.5}
+    \caption{Bảng đối chiếu mục tiêu và kết quả thực hiện}
+    \label{tab:ket_qua_doi_chieu}
+    \begin{tabularx}{\textwidth}{|>{\bfseries\raggedright\arraybackslash}p{4cm}|X|>{\centering\arraybackslash}p{2cm}|}
+        \hline
+        \rowcolor{gray!30} \textbf{Mục tiêu ban đầu} & \textbf{Kết quả đạt được} & \textbf{Tỉ lệ (\%)} \\ \hline
+        Xây dựng ứng dụng xem phim trực tuyến trên Android & Hoàn thiện luồng từ Đăng ký/Đăng nhập, Trang chủ, Chi tiết phim, Phát video đến Shorts và lịch Premier League. & 100\% \\ \hline
+        Áp dụng kiến trúc Client--Server phân lớp & Backend tổ chức rõ rệt ba tầng Controller--Service--Repository; Android client phân lớp UI--Repository--Network. & 100\% \\ \hline
+        Quản lý nội dung tập trung qua Admin Panel & Triển khai đầy đủ CRUD phim/danh mục qua \texttt{AdminDashboardActivity}, \texttt{AdminFilmListActivity} và \texttt{FilmFormDialogFragment}. & 100\% \\ \hline
+        Phát video streaming mượt mà & ExoPlayer (Media3 1.5) streaming trực tiếp từ \texttt{videoUrl}, không qua backend. & 100\% \\ \hline
+        Bảo mật phiên đăng nhập & JWT Bearer Token (HMAC-SHA256, hạn 2 giờ), mật khẩu băm BCrypt, AuthInterceptor tự đính kèm token. & 90\% \\ \hline
+    \end{tabularx}
+\end{table}
+
+Bên cạnh việc đáp ứng các yêu cầu nghiệp vụ, đồ án đã chứng minh được năng lực vận dụng nhiều mẫu thiết kế và công nghệ tiêu biểu trong lập trình di động:
+\begin{itemize}
+    \item \textbf{Kiến trúc phân lớp ba tầng} ở backend (Spring Boot 3.5.11) được tách bạch rõ ràng giữa Controller, Service và Repository, kết hợp \textbf{DTO Pattern} và vỏ phản hồi thống nhất \texttt{ApiResponse<T>}.
+    \item \textbf{Quản lý schema bằng Flyway} với bốn migration \texttt{V1}--\texttt{V4}, đảm bảo schema PostgreSQL luôn nhất quán giữa máy của các thành viên và môi trường demo.
+    \item \textbf{Spring Security Filter Chain} kết hợp \texttt{AuthTokenFilter} và \texttt{JwtEntryPoint} cho cơ chế xác thực JWT stateless, tách hoàn toàn logic xác thực khỏi tầng nghiệp vụ.
+    \item Phía Android áp dụng đồng thời nhiều mẫu thiết kế: \textbf{Repository Pattern}, \textbf{Singleton} (\texttt{ApiClient}, \texttt{AuthManager}), \textbf{Interceptor} (\texttt{AuthInterceptor}), \textbf{Observer} qua \texttt{LiveData} và \textbf{Template Method} qua \texttt{BaseFragment}.
+    \item \textbf{Phát video tách biệt khỏi luồng dữ liệu nghiệp vụ}: ExoPlayer streaming trực tiếp từ URL nguồn (HTTP/HLS), backend chỉ cung cấp \texttt{videoUrl} trong DTO -- giảm đáng kể tải cho backend.
+\end{itemize}
+
+\textbf{Kết luận chung:} Ứng dụng CineFlow đã giải quyết thành công bài toán cốt lõi của một nền tảng xem phim trực tuyến trên thiết bị Android, đồng thời cung cấp đầy đủ công cụ quản trị nội dung cho Admin. Đồ án không chỉ dừng lại ở mức một ứng dụng CRUD đơn giản mà đã hiện thực hoá đầy đủ luồng xác thực, quản lý nội dung, phát video và các mẫu thiết kế chuẩn mực của lập trình di động hiện đại.
+
+% ────────────────────────────────────────────────────────────
+\section{Hạn chế và hướng phát triển}
+\label{sec:han_che_huong_phat_trien}
+
+Mặc dù đã đạt được những kết quả nhất định, do giới hạn về thời gian và phạm vi của một đồ án môn học, hệ thống vẫn còn một số hạn chế kỹ thuật:
+
+\subsection{Hạn chế hiện tại}
+\begin{itemize}
+    \item \textbf{Bảo mật ở tầng URL:} \texttt{SecurityConfig} hiện đang \texttt{permitAll()} toàn bộ URL; việc kiểm tra vai trò Admin mới chỉ được thực hiện ở tầng logic/annotation trong Controller và Service, chưa chặn ở tầng \texttt{HttpSecurity}. Đây là khoản nợ kỹ thuật cần ưu tiên xử lý trước khi đưa ra ngoài môi trường phát triển.
+    \item \textbf{Tính năng nghiệp vụ chưa hoàn thiện:} Hai tab \textit{Series} và \textit{Movies} trong \texttt{MainActivity} hiện vẫn dùng \texttt{HomeFragment} dưới dạng placeholder, chưa có giao diện và logic riêng. Các bảng nghiệp vụ \texttt{Favorite}, \texttt{WatchHistory}, \texttt{UserSubscription}, \texttt{SubscriptionPackage} đã có sẵn trong schema nhưng chưa được phơi qua API và UI.
+    \item \textbf{Phân phối nội dung video:} Backend chỉ lưu URL trỏ tới nguồn video bên ngoài, chưa tích hợp CDN riêng hay cơ chế ký URL (Signed URL) để bảo vệ nội dung trả phí (\texttt{isPremium}).
+    \item \textbf{Phiên đăng nhập:} Hiện chỉ có Access Token hạn 2 giờ, chưa triển khai Refresh Token; khi token hết hạn, người dùng buộc phải đăng nhập lại thay vì gia hạn ngầm.
+    \item \textbf{Môi trường triển khai:} Backend mới chạy ở \texttt{localhost:8080} (HTTP plaintext) phục vụ emulator qua \texttt{10.0.2.2}; chưa có cấu hình HTTPS, reverse proxy và đóng gói triển khai cho thiết bị thật trên LAN/Internet.
+    \item \textbf{Kiểm thử tự động:} Đồ án chưa xây dựng bộ unit test/integration test cho backend và Android client; toàn bộ việc kiểm tra hiện được thực hiện thủ công qua Postman và emulator.
+\end{itemize}
+
+\subsection{Hướng phát triển ngắn hạn (3--6 tháng)}
+Để củng cố chất lượng sản phẩm và đưa hệ thống tiệm cận mức triển khai thử nghiệm thực tế, nhóm đề ra các hướng phát triển tiếp theo:
+\begin{itemize}
+    \item \textbf{Hoàn thiện cấu hình Spring Security:} Thay \texttt{permitAll()} bằng các rule \texttt{HttpSecurity} ở tầng URL kết hợp \texttt{@PreAuthorize} ở tầng Controller, kiểm tra role \texttt{ROLE\_ADMIN} cho toàn bộ endpoint \texttt{/admin/*}.
+    \item \textbf{Cơ chế Refresh Token:} Bổ sung endpoint \texttt{/auth/refresh}, quản lý vòng đời Refresh Token để gia hạn phiên đăng nhập ngầm mà không yêu cầu người dùng đăng nhập lại.
+    \item \textbf{Hoàn thiện Series và Movies:} Xây dựng \texttt{SeriesFragment} và \texttt{MoviesFragment} riêng, có bộ lọc theo \texttt{FilmType} và \texttt{Category}.
+    \item \textbf{Tính năng Yêu thích và Resume Watching:} Phơi các bảng \texttt{Favorite}, \texttt{WatchHistory} qua API, cho phép người dùng đánh dấu phim yêu thích và tiếp tục xem từ vị trí dừng (\texttt{progressSeconds}).
+    \item \textbf{Gói thuê bao:} Tích hợp \texttt{SubscriptionPackage}/\texttt{UserSubscription} với một cổng thanh toán trong nước (VNPay, MoMo) để mở khoá nội dung có cờ \texttt{isPremium}.
+    \item \textbf{Kiểm thử tự động:} Bổ sung JUnit + Spring Boot Test cho backend và Espresso/JUnit cho Android client, tích hợp vào pipeline CI cơ bản trên GitHub Actions.
+\end{itemize}
+
+\subsection{Hướng phát triển dài hạn (>6 tháng)}
+\begin{itemize}
+    \item \textbf{Triển khai HTTPS và đóng gói server:} Đóng gói backend thành Docker image, vận hành sau Nginx reverse proxy với chứng chỉ Let's Encrypt; cập nhật \texttt{network\_security\_config.xml} của Android client để chỉ cho phép TLS.
+    \item \textbf{CDN và bảo vệ nội dung Premium:} Tích hợp một CDN (CloudFront, Cloudflare Stream\dots) kết hợp Signed URL có thời hạn ngắn, ngăn việc chia sẻ link video trả phí ra ngoài.
+    \item \textbf{Push Notification:} Tích hợp Firebase Cloud Messaging (FCM) để thông báo phim mới, tập mới của series người dùng đang theo dõi và các sự kiện thể thao trực tiếp.
+    \item \textbf{Hệ thống gợi ý phim:} Xây dựng module Recommendation dựa trên \texttt{WatchHistory} và \texttt{Favorite}, đề xuất nội dung phù hợp với hành vi xem của người dùng.
+    \item \textbf{Mở rộng nền tảng:} Cân nhắc phát triển thêm client trên iOS hoặc một SPA web dùng chung backend, tận dụng tối đa REST API hiện có với tiền tố \texttt{/api/v1}.
+\end{itemize}

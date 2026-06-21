@@ -1,0 +1,26 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant RP as ResetPasswordActivity
+    participant API as AuthController
+    participant SVC as AuthService
+    participant DB as PostgreSQL
+
+    U->>RP: Mở link reset (có token)
+    RP->>API: GET /auth/validate-reset-token?token=xxx
+    API->>SVC: validateToken(token)
+    SVC->>DB: SELECT reset_token
+    DB-->>SVC: Token (chưa dùng, chưa hết hạn)
+    SVC-->>API: valid=true
+    API-->>RP: 200 OK
+
+    U->>RP: Nhập mật khẩu mới
+    RP->>API: POST /auth/reset-password
+    API->>SVC: resetPassword(token, newPwd)
+    SVC->>SVC: BCrypt.hash(newPwd)
+    SVC->>DB: UPDATE users SET password
+    SVC->>DB: UPDATE reset_token SET used=true
+    DB-->>SVC: OK
+    SVC-->>API: success
+    API-->>RP: 200 ApiResponse OK
+    RP-->>U: Chuyển về LoginActivity
