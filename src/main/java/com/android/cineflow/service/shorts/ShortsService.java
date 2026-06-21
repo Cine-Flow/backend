@@ -46,7 +46,7 @@ public class ShortsService implements IShortsService {
         }
 
         List<ShortsDto> shorts = episodes.stream()
-                .filter(ep -> ep.getVideoUrl() != null && !ep.getVideoUrl().isEmpty())
+                .filter(ep -> ep.getVideoUrl() != null && !ep.getVideoUrl().isEmpty() && "SHORT".equals(ep.getFilm().getBadge()))
                 .map(ep -> {
                     Integer filmId = ep.getFilm().getId();
                     boolean isLiked = favoriteFilmIds.contains(filmId);

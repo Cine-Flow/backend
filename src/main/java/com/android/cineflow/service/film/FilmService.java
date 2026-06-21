@@ -43,11 +43,12 @@ public class FilmService implements IFilmService {
         List<Film> allByNewDesc = filmRepository.findAll(byNewDesc);
 
         List<Film> banners = allByIdDesc.stream()
+                .filter(film -> !"SHORT".equals(film.getBadge()) && !"SPORTS".equals(film.getBadge()) && film.getType() != FilmType.LIVE)
                 .limit(3)
                 .toList();
 
         List<Film> newReleases = allByNewDesc.stream()
-                .filter(film -> film.getType() == FilmType.SINGLE || film.getType() == FilmType.SERIES)
+                .filter(film -> (film.getType() == FilmType.SINGLE || film.getType() == FilmType.SERIES) && !"SHORT".equals(film.getBadge()))
                 .limit(6)
                 .toList();
 
@@ -57,12 +58,12 @@ public class FilmService implements IFilmService {
                 .toList();
 
         List<Film> hotSeries = allByIdDesc.stream()
-                .filter(film -> film.getType() == FilmType.SERIES)
+                .filter(film -> film.getType() == FilmType.SERIES && !"SHORT".equals(film.getBadge()))
                 .limit(8)
                 .toList();
 
         List<Film> dailyMovies = allByIdDesc.stream()
-                .filter(film -> film.getType() == FilmType.SINGLE)
+                .filter(film -> film.getType() == FilmType.SINGLE && !"SHORT".equals(film.getBadge()))
                 .limit(6)
                 .toList();
 
