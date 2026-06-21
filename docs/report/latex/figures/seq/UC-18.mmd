@@ -1,0 +1,16 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant PA as PlayerActivity
+    participant API as UserContentController
+    participant SVC as UserContentService
+    participant DB as PostgreSQL
+
+    U->>PA: Xem phim / Dừng phát
+    PA->>PA: Ghi nhận vị trí phát (giây)
+    PA->>API: PUT /watch-history/{episodeId}
+    API->>SVC: updateWatchHistory(episodeId, request)
+    SVC->>DB: INSERT/UPDATE watch_history
+    DB-->>SVC: Thành công
+    SVC-->>API: WatchHistoryDto
+    API-->>PA: ApiResponse OK

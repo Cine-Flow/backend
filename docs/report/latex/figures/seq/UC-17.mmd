@@ -1,0 +1,17 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant FD as FilmDetailActivity
+    participant API as FilmCommentController
+    participant SVC as FilmCommentService
+    participant DB as PostgreSQL
+
+    U->>FD: Nhập nội dung + nhấn "Gửi"
+    FD->>API: POST /films/{filmId}/comments
+    API->>SVC: createComment(filmId, request)
+    SVC->>DB: INSERT INTO film_comments (film_id, user_id, content)
+    DB-->>SVC: Thành công (Comment entity)
+    SVC-->>API: CommentDto
+    API-->>FD: ApiResponse OK (CommentDto)
+    FD->>FD: Thêm comment mới lên đầu RecyclerView
+    FD-->>U: Hiển thị bình luận mới

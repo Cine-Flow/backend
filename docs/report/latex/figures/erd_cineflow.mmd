@@ -60,6 +60,21 @@ erDiagram
         int progress_seconds
         timestamp updated_at
     }
+    FILM_COMMENT {
+        int id PK
+        int film_id FK
+        varchar user_id FK
+        text content
+        timestamp created_at
+    }
+    REFRESH_TOKEN {
+        varchar id PK
+        varchar user_id FK
+        varchar token UK
+        timestamp expiry_date
+        boolean revoked
+        timestamp created_at
+    }
 
     USER ||--o{ USER_SUBSCRIPTION : has
     SUBSCRIPTION_PACKAGE ||--o{ USER_SUBSCRIPTION : selected_by
@@ -70,3 +85,6 @@ erDiagram
     FILM ||--o{ FAVORITE : marked_by
     USER ||--o{ WATCH_HISTORY : watches
     EPISODE ||--o{ WATCH_HISTORY : watched_in
+    USER ||--o{ REFRESH_TOKEN : owns
+    USER ||--o{ FILM_COMMENT : writes
+    FILM ||--o{ FILM_COMMENT : has

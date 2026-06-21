@@ -2,9 +2,9 @@
 flowchart TB
     subgraph Mobile["Thiết bị di động (Android)"]
         UI[UI Layer<br/>Activity, Fragment, Adapter]
-        Repo[Repository Layer<br/>HomeRepo, AdminFilmRepo,<br/>PremierLeagueRepo]
+        Repo[Repository Layer<br/>HomeRepo, AdminFilmRepo,<br/>PremierLeagueRepo, ShortsRepo]
         Auth[AuthManager<br/>SharedPreferences]
-        Net[Network Layer<br/>Retrofit + OkHttp<br/>AuthInterceptor]
+        Net["Network Layer<br/>Volley + Gson<br/>(via OkHttp3Stack)"]
         Player[ExoPlayer Media3]
         UI --> Repo
         UI --> Auth
@@ -25,7 +25,7 @@ flowchart TB
 
     DB[(PostgreSQL<br/>+ Flyway)]
     SMTP[Email Server<br/>SMTP]
-    CDN[Video URLs<br/>HTTP / HLS / DASH]
+    CDN[MinIO Object Storage<br/>Films, Shorts, Images]
 
     Net -->|REST API<br/>/api/v1/...| Ctrl
     RepoJ -->|JDBC| DB
