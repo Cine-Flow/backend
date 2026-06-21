@@ -124,12 +124,17 @@
 % ── Tiện ích khác ────────────────────────────────────────────
 \usepackage{enumitem}
 \usepackage{microtype}
-\usepackage{tocbibind}
+\usepackage[nottoc,notlof,notlot]{tocbibind}
 \usepackage{tocloft}
 
 \setlength{\cftbeforechapskip}{6pt}
 \renewcommand{\cftchapfont}{\bfseries}
 \renewcommand{\cftchappagefont}{\bfseries}
+\renewcommand{\cftchappresnum}{Chương~}
+\setlength{\cftchapnumwidth}{2.3cm}
+\setlength{\cftaftertoctitleskip}{20pt}
+\setlength{\cftafterloftitleskip}{20pt}
+\setlength{\cftafterlottitleskip}{20pt}
 
 % ── Lệnh tiện ích nội bộ ─────────────────────────────────────
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
@@ -164,6 +169,7 @@
 
 % ── Phụ lục ─────────────────────────────────────────────────
 \appendix
+\addtocontents{toc}{\protect\renewcommand{\protect\cftchappresnum}{Phụ lục~}}
 \input{appendix/phan_cong_cong_viec}
 
 \end{document}
