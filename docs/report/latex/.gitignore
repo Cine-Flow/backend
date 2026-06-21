@@ -1,4 +1,5 @@
-# LaTeX build artifacts — keep main.pdf and sources, ignore everything latexmk generates
+# LaTeX build artifacts — keep sources, ignore main.pdf and everything latexmk generates
+main.pdf
 *.aux
 *.bbl
 *.bcf
