@@ -39,55 +39,63 @@ chức năng (Features) độc lập.
 Bảng~\ref{tab:nfr} tổng hợp các yêu cầu phi chức năng của hệ thống CineFlow, chia
 theo 6 thuộc tính chất lượng.
 
-\begin{table}[H]
-  \centering
-  \caption{Yêu cầu phi chức năng của hệ thống CineFlow}
-  \label{tab:nfr}
-  \renewcommand{\arraystretch}{1.4}
-  \begin{tabularx}{\textwidth}{|l|X|X|}
-    \hline
-    \textbf{Thuộc tính}      & \textbf{Yêu cầu} & \textbf{Giải pháp kỹ thuật} \\
-    \hline
-    \textbf{Hiệu năng}       &
-    Thời gian phản hồi API $\leq$ 500ms (p95) cho các endpoint nghiệp vụ chính. Video
-    bắt đầu phát trong $\leq$ 3 giây kể từ khi người dùng bấm Play. &
-    Backend tách Repository -- Service -- Controller; Android client tải bất đồng bộ
-    qua Volley + Gson (phối hợp OkHttp3Stack); ExoPlayer với HLS adaptive bitrate. \\
-    \hline
-    \textbf{Khả năng mở rộng} &
-    Ứng dụng có thể bổ sung loại nội dung mới (Series, Live, Shorts) mà không phải
-    sửa đổi cấu trúc cốt lõi. &
-    Mô hình dữ liệu thống nhất quanh \texttt{Film} với enum \texttt{FilmType}; backend
-    phân lớp ba tầng giúp thêm endpoint mới mà không phá vỡ tầng dữ liệu. \\
-    \hline
-    \textbf{Tính nhất quán dữ liệu} &
-    Schema cơ sở dữ liệu của tất cả thành viên trong nhóm phải luôn đồng bộ. Các thao
-    tác CRUD trên Admin Panel phản ánh ngay xuống ứng dụng người dùng. &
-    Flyway Migrations quản lý schema theo phiên bản. Backend đọc/ghi cùng một
-    PostgreSQL nên không có khoảng trễ đồng bộ. \\
-    \hline
-    \textbf{Bảo mật} &
-    Mọi endpoint quản trị phải xác thực. Mật khẩu không được lưu dưới dạng plaintext.
-    Token đăng nhập phải có hạn sử dụng. &
-    JWT Bearer Token với chữ ký HMAC-SHA256, thời hạn 2 giờ. Mật khẩu băm bằng BCrypt.
-    Android client lưu token trong \texttt{SharedPreferences} ở chế độ private. \\
-    \hline
-    \textbf{Tính sẵn sàng} &
-    Ứng dụng phải xử lý được trường hợp mất mạng tạm thời mà không bị treo (ANR --
-    Application Not Responding). &
-    Mọi lời gọi mạng dùng Volley \texttt{enqueue} bất đồng bộ trên luồng nền (qua lớp bọc \texttt{Call} tương thích); UI
-    cập nhật qua \texttt{LiveData} lifecycle-aware; hiển thị trạng thái lỗi thân thiện
-    khi mất kết nối. \\
-    \hline
-    \textbf{Bảo trì \& vận hành} &
-    Schema database chỉ được thay đổi qua migration, không sửa trực tiếp. Mã nguồn
-    Android tuân thủ kiến trúc phân lớp, dễ kiểm thử. &
-    Flyway cho phía backend; \texttt{BaseFragment} chuẩn hoá lifecycle Android; tất
-    cả Fragment tuân theo luồng \texttt{getLayoutId} $\rightarrow$ \texttt{initViews}
-    $\rightarrow$ \texttt{initData}. \\
-    \hline
-  \end{tabularx}
-\end{table}
+\begingroup
+\renewcommand{\arraystretch}{1.4}
+\begin{longtable}{|p{3.2cm}|p{5.8cm}|p{5.8cm}|}
+  \caption{Yêu cầu phi chức năng của hệ thống CineFlow} \label{tab:nfr} \\
+  \hline
+  \textbf{Thuộc tính}      & \textbf{Yêu cầu} & \textbf{Giải pháp kỹ thuật} \\
+  \hline
+  \endfirsthead
+
+  \hline
+  \textbf{Thuộc tính}      & \textbf{Yêu cầu} & \textbf{Giải pháp kỹ thuật} \\
+  \hline
+  \endhead
+
+  \hline
+  \endfoot
+
+  \textbf{Hiệu năng}       &
+  Thời gian phản hồi API $\leq$ 500ms (p95) cho các endpoint nghiệp vụ chính. Video
+  bắt đầu phát trong $\leq$ 3 giây kể từ khi người dùng bấm Play. &
+  Backend tách Repository -- Service -- Controller; Android client tải bất đồng bộ
+  qua Volley + Gson (phối hợp OkHttp3Stack); ExoPlayer với HLS adaptive bitrate. \\
+  \hline
+  \textbf{Khả năng mở rộng} &
+  Ứng dụng có thể bổ sung loại nội dung mới (Series, Live, Shorts) mà không phải
+  sửa đổi cấu trúc cốt lõi. &
+  Mô hình dữ liệu thống nhất quanh \texttt{Film} với enum \texttt{FilmType}; backend
+  phân lớp ba tầng giúp thêm endpoint mới mà không phá vỡ tầng dữ liệu. \\
+  \hline
+  \textbf{Tính nhất quán dữ liệu} &
+  Schema cơ sở dữ liệu của tất cả thành viên trong nhóm phải luôn đồng bộ. Các thao
+  tác CRUD trên Admin Panel phản ánh ngay xuống ứng dụng người dùng. &
+  Flyway Migrations quản lý schema theo phiên bản. Backend đọc/ghi cùng một
+  PostgreSQL nên không có khoảng trễ đồng bộ. \\
+  \hline
+  \textbf{Bảo mật} &
+  Mọi endpoint quản trị phải xác thực. Mật khẩu không được lưu dưới dạng plaintext.
+  Token đăng nhập phải có hạn sử dụng. &
+  JWT Bearer Token với chữ ký HMAC-SHA256, thời hạn 2 giờ. Mật khẩu băm bằng BCrypt.
+  Android client lưu token trong \texttt{SharedPreferences} ở chế độ private. \\
+  \hline
+  \textbf{Tính sẵn sàng} &
+  Ứng dụng phải xử lý được trường hợp mất mạng tạm thời mà không bị treo (ANR --
+  Application Not Responding). &
+  Mọi lời gọi mạng dùng Volley \texttt{enqueue} bất đồng bộ trên luồng nền (qua lớp bọc \texttt{Call} tương thích); UI
+  cập nhật qua \texttt{LiveData} lifecycle-aware; hiển thị trạng thái lỗi thân thiện
+  khi mất kết nối. \\
+  \hline
+  \textbf{Bảo trì \& vận hành} &
+  Schema database chỉ được thay đổi qua migration, không sửa trực tiếp. Mã nguồn
+  Android tuân thủ kiến trúc phân lớp, dễ kiểm thử. &
+  Flyway cho phía backend; \texttt{BaseFragment} chuẩn hoá lifecycle Android; tất
+  cả Fragment tuân theo luồng \texttt{getLayoutId} $\rightarrow$ \texttt{initViews}
+  $\rightarrow$ \texttt{initData}. \\
+  \hline
+\end{longtable}
+\endgroup
 
 
 % ────────────────────────────────────────────────────────────
