@@ -1,0 +1,19 @@
+# LaTeX build artifacts — keep main.pdf and sources, ignore everything latexmk generates
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.run.xml
+*.toc
+*.xdv
+*.out
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+*.bak
