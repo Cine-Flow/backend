@@ -1,33 +1,36 @@
-%%{init: {"theme": "default"}}%%
+%%{init: {"theme": "default", "flowchart": {"curve": "basis", "padding": 20, "nodeSpacing": 30, "rankSpacing": 50}}}%%
 flowchart TB
-    subgraph Mobile["Thiết bị di động (Android)"]
-        UI[UI Layer<br/>Activity, Fragment, Adapter]
-        Repo[Repository Layer<br/>HomeRepo, AdminFilmRepo,<br/>PremierLeagueRepo, ShortsRepo]
-        Auth[AuthManager<br/>SharedPreferences]
-        Net["Network Layer<br/>Volley + Gson<br/>(via OkHttp3Stack)"]
-        Player[ExoPlayer Media3]
+    subgraph Mobile["Ứng dụng Android"]
+        direction TB
+        UI["Tầng giao diện<br/>Activity / Fragment / Adapter"]
+        Repo["Tầng Repository<br/>LiveData"]
+        Local["Tầng lưu trữ nội bộ<br/>Room Database"]
+        Net["Tầng mạng<br/>Volley + OkHttp"]
+        Auth["Tầng xác thực<br/>Quản lý phiên đăng nhập"]
+        Player["Trình phát video<br/>Media3 ExoPlayer"]
         UI --> Repo
         UI --> Auth
         UI --> Player
         Repo --> Net
+        Repo --> Local
         Net --> Auth
     end
 
-    subgraph Backend["Backend (Spring Boot)"]
-        Ctrl[Controller Layer<br/>AuthController, FilmController,<br/>AdminFilmController]
-        Svc[Service Layer<br/>AuthService, FilmService,<br/>EmailService]
-        RepoJ[Repository Layer<br/>Spring Data JPA]
-        Sec[Spring Security<br/>JwtUtils, AuthTokenFilter]
+    subgraph Backend["Máy chủ Spring Boot"]
+        direction TB
+        Ctrl["Tầng Controller<br/>REST Endpoint"]
+        Svc["Tầng Service<br/>Logic nghiệp vụ"]
+        RepoJ["Tầng Repository<br/>Spring Data JPA"]
         Ctrl --> Svc
         Svc --> RepoJ
-        Ctrl -.-> Sec
     end
 
-    DB[(PostgreSQL<br/>+ Flyway)]
-    SMTP[Email Server<br/>SMTP]
-    CDN[MinIO Object Storage<br/>Films, Shorts, Images]
+    DB[("PostgreSQL<br/>+ Flyway")]
+    MinIO["MinIO<br/>Lưu trữ media"]
+    SMTP["Email Server"]
 
-    Net -->|REST API<br/>/api/v1/...| Ctrl
-    RepoJ -->|JDBC| DB
-    Svc -->|Spring Mail| SMTP
-    Player -->|Streaming trực tiếp| CDN
+    Net -->|"REST API / JSON"| Ctrl
+    RepoJ -->|"JDBC"| DB
+    Svc --> MinIO
+    Svc --> SMTP
+    Player -->|"HLS / DASH"| MinIO
