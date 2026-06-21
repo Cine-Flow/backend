@@ -9,10 +9,16 @@
 \usepackage{fontspec}
 \usepackage{polyglossia}
 \setmainlanguage{vietnamese}
-% TeX Gyre fonts — tương đương Times/Arial/Courier, có sẵn trong TeXLive
-\setmainfont{TeX Gyre Termes}
-\setsansfont{Arial}
-\setmonofont[Scale=0.9]{TeX Gyre Cursor}
+% Font chữ Unicode cho Windows/MiKTeX, có fallback nếu chạy trên môi trường TeX Live.
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
+\IfFontExistsTF{Arial}
+  {\setsansfont{Arial}}
+  {\setsansfont{TeX Gyre Heros}}
+\IfFontExistsTF{Courier New}
+  {\setmonofont[Scale=0.9]{Courier New}}
+  {\setmonofont[Scale=0.9]{TeX Gyre Cursor}}
 
 % ── Căn lề chuẩn A4 học thuật ───────────────────────────────
 \usepackage[
