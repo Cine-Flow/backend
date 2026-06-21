@@ -1,0 +1,17 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant MF as MoreFragment
+    participant DLG as Dialog xác nhận
+    participant AM as AuthManager
+    participant SP as SharedPreferences
+
+    U->>MF: Bấm "Đăng xuất"
+    MF->>DLG: show()
+    U->>DLG: Xác nhận
+    DLG->>AM: clearSession()
+    AM->>SP: remove(token, userId, role)
+    SP-->>AM: OK
+    AM-->>MF: Done
+    MF->>MF: refreshHeader()
+    MF-->>U: Hiển thị nút "Đăng nhập"

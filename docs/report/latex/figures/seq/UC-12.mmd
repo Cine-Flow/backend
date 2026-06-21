@@ -1,0 +1,25 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor A as Admin
+    participant AL as AdminFilmListActivity
+    participant DLG as FilmFormDialogFragment
+    participant AR as AdminFilmRepository
+    participant API as AdminFilmController
+    participant SVC as FilmService
+    participant DB as PostgreSQL
+
+    A->>AL: Bấm FAB "Tạo mới"
+    AL->>DLG: show()
+    A->>DLG: Điền form
+    DLG->>AR: createFilm(request)
+    AR->>API: POST /admin/films
+    API->>SVC: createFilm(request)
+    SVC->>DB: INSERT films
+    DB-->>SVC: Film entity
+    SVC-->>API: FilmResponse
+    API-->>AR: 200 ApiResponse OK
+    AR-->>DLG: LiveData success
+    DLG-->>AL: dismiss()
+    AL->>AR: refreshList()
+    AR-->>AL: Danh sách mới
+    AL-->>A: Hiển thị phim vừa tạo

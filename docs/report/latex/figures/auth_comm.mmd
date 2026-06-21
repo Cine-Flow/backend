@@ -1,0 +1,26 @@
+%%{init: {"theme": "default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant LA as LoginActivity
+    participant AM as AuthManager
+    participant AI as AuthInterceptor
+    participant API as Backend API
+    participant DB as PostgreSQL
+
+    U->>LA: Nhập username + mật khẩu
+    LA->>API: POST /auth/login
+    API->>DB: Tìm user, so sánh BCrypt
+    DB-->>API: User hợp lệ
+    API-->>LA: 200 OK { token, user }
+    LA->>AM: saveSession(token, userId, role)
+    AM-->>LA: Lưu vào SharedPreferences
+
+    Note over U,API: Các request tiếp theo
+
+    U->>LA: Mở màn hình khác
+    LA->>AI: Gọi API qua Retrofit
+    AI->>AM: getToken()
+    AM-->>AI: JWT
+    AI->>API: Authorization: Bearer <JWT>
+    API-->>AI: Phản hồi
+    AI-->>LA: Dữ liệu

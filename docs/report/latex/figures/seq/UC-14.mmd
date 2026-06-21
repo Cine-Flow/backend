@@ -1,0 +1,23 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor A as Admin
+    participant AL as AdminFilmListActivity
+    participant DLG as Dialog xác nhận
+    participant AR as AdminFilmRepository
+    participant API as AdminFilmController
+    participant SVC as FilmService
+    participant DB as PostgreSQL
+
+    A->>AL: Bấm icon xoá
+    AL->>DLG: show("Xác nhận xoá?")
+    A->>DLG: Xác nhận
+    DLG->>AR: deleteFilm(id)
+    AR->>API: DELETE /admin/films/{id}
+    API->>SVC: deleteFilm(id)
+    SVC->>DB: DELETE films (cascade episodes)
+    DB-->>SVC: OK
+    SVC-->>API: success
+    API-->>AR: 200 ApiResponse OK
+    AR-->>AL: LiveData success
+    AL->>AL: Cập nhật danh sách
+    AL-->>A: Phim đã xoá

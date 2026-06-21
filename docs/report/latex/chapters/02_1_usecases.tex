@@ -1,0 +1,278 @@
+
+% ============================================================
+%  NHÓM 1: Xác thực và Tài khoản (UC-01 .. UC-05)
+% ============================================================
+\subsubsection*{Nhóm 1: Xác thực và Tài khoản}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-01} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Đăng ký tài khoản} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Người xem (User) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Người dùng tạo tài khoản mới trên CineFlow bằng email và mật khẩu. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Người dùng chưa đăng nhập, có kết nối Internet. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Tài khoản được tạo với vai trò \texttt{ROLE\_USER}, mật khẩu được băm trước khi lưu. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. Người dùng nhập \texttt{username}, \texttt{email}, \texttt{password}.\newline 2. Hệ thống kiểm tra trùng lặp email/username.\newline 3. Hệ thống băm mật khẩu bằng BCrypt và lưu vào CSDL. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Email đã tồn tại}: Hệ thống trả lỗi \textit{Email already exists}. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_01.1}: Mật khẩu phải có tối thiểu 6 ký tự.\newline $\diamond$ \textbf{FR\_01.2}: Mật khẩu không được lưu dưới dạng plaintext. \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-02} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Đăng nhập hệ thống} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Người xem (User), Quản trị viên (Admin) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Người dùng đăng nhập bằng username và mật khẩu để nhận JWT. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Tài khoản đã được đăng ký. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Nhận về JWT có hạn 2 giờ; thông tin phiên được lưu vào \texttt{SharedPreferences}. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. Người dùng nhập username/mật khẩu.\newline 2. Hệ thống đối chiếu mật khẩu băm trong CSDL.\newline 3. Hệ thống sinh JWT chứa \texttt{userId} và \texttt{role}, trả về cho client. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Sai thông tin}: Báo lỗi \textit{Invalid username or password}. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_02.1}: JWT phải được ký bằng \texttt{JWT\_SECRET} từ biến môi trường.\newline $\diamond$ \textbf{FR\_02.2}: Token có thời hạn 2 giờ. \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-03} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Quên mật khẩu} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Người xem (User), Email Server \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Người dùng yêu cầu khôi phục mật khẩu qua email. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Không yêu cầu đăng nhập. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Hệ thống sinh \texttt{resetToken} có thời hạn và gửi link khôi phục vào email. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. Người dùng nhập email.\newline 2. Hệ thống tạo \texttt{resetToken} ngẫu nhiên.\newline 3. Hệ thống gửi email chứa link kèm token qua SMTP. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Email không tồn tại}: Trả về 200 OK nhưng không gửi mail để tránh lộ thông tin tài khoản. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_03.1}: \texttt{resetToken} chỉ có hiệu lực một lần duy nhất trong 30 phút. \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-04} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Đặt lại mật khẩu} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Người xem (User) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Người dùng đặt mật khẩu mới sau khi xác thực qua \texttt{resetToken}. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Sở hữu \texttt{resetToken} hợp lệ, chưa hết hạn. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Mật khẩu mới được băm và lưu; token bị vô hiệu hoá. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. Client kiểm tra token còn hiệu lực qua \texttt{GET /auth/validate-reset-token}.\newline 2. Người dùng nhập mật khẩu mới.\newline 3. Hệ thống băm mật khẩu, cập nhật CSDL, vô hiệu hoá token. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Token hết hạn hoặc đã dùng}: Báo lỗi \textit{Reset token expired or already used}. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_04.1}: Sau khi đặt lại, mọi phiên đăng nhập cũ vẫn hợp lệ cho đến khi JWT hết hạn tự nhiên. \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-05} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Đăng xuất} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Người xem (User), Quản trị viên (Admin) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Người dùng đăng xuất khỏi ứng dụng. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Người dùng đã đăng nhập. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Thông tin phiên trong \texttt{SharedPreferences} bị xoá; UI quay về trạng thái khách. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. Người dùng bấm \textit{Đăng xuất} trong tab More.\newline 2. \texttt{AuthManager} xoá token, userId, username, role.\newline 3. UI \texttt{MoreFragment} tự cập nhật về trạng thái chưa đăng nhập. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & Không có. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_05.1}: Đăng xuất chỉ là thao tác phía client; backend là stateless. \\ \hline
+\end{tabularx}
+\end{table}
+
+
+% ============================================================
+%  NHÓM 2: Khám phá Nội dung (UC-06 .. UC-10)
+% ============================================================
+\subsubsection*{Nhóm 2: Khám phá Nội dung}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-06} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Xem trang chủ} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Người xem (User), Khách (Guest) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Người dùng xem trang chủ với nhiều khu vực nội dung (banner, phim mới, sự kiện thể thao, series, phim trong ngày). \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Không yêu cầu đăng nhập. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Trang chủ hiển thị đầy đủ năm khu vực nội dung. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. \texttt{HomeFragment} gọi \texttt{GET /films/home}.\newline 2. Backend trả về object chứa \texttt{banners}, \texttt{newReleases}, \texttt{sportEvents}, \texttt{hotSeries}, \texttt{dailyMovies}.\newline 3. Client render từng khu vực vào \texttt{RecyclerView} tương ứng. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Mất kết nối}: Hiển thị thông báo lỗi và nút \textit{Thử lại}. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_06.1}: Trang chủ phải hiển thị trong $\leq$ 2 giây với cache ảnh Glide. \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-07} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Xem chi tiết phim} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Người xem (User) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Người dùng xem mô tả chi tiết, trailer và danh sách tập của một phim. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Người dùng đã chọn một phim từ trang chủ hoặc kết quả tìm kiếm. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & \texttt{FilmDetailActivity} hiển thị đầy đủ thông tin phim và danh sách \texttt{Episode}. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. Client gọi \texttt{GET /films/\{id\}}.\newline 2. Backend trả về \texttt{Film} kèm danh sách \texttt{Episode}.\newline 3. UI render mô tả, ảnh thumbnail và danh sách tập. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Không tìm thấy phim}: Backend trả 404, client hiển thị thông báo \textit{Phim không tồn tại}. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_07.1}: Với phim lẻ (\texttt{SINGLE}), hệ thống tự sinh một \texttt{Episode} mặc định để tái sử dụng luồng phát. \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-08} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Phát video} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Người xem (User) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Người dùng phát phim lẻ, một tập của series, hoặc sự kiện trực tiếp. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Đã chọn một \texttt{Episode}/phim cụ thể, có kết nối Internet. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Video bắt đầu phát trong \texttt{PlayerActivity}. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. Client mở \texttt{PlayerActivity} với \texttt{videoUrl}.\newline 2. ExoPlayer khởi tạo \texttt{MediaItem} và bắt đầu prepare.\newline 3. Player phát video, hiển thị thanh điều khiển. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{URL không khả dụng}: Player phát ra \texttt{Player.Listener.onPlayerError}, UI hiển thị lỗi và nút \textit{Thử lại}. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_08.1}: Player phải giải phóng tài nguyên trong \texttt{onDestroy()} để tránh rò rỉ bộ nhớ. \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-09} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Xem video ngắn (Shorts)} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Người xem (User) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Người dùng cuộn dọc xem các video ngắn, tự động phát/dừng theo vị trí cuộn. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Có kết nối Internet. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Mỗi lần cuộn chỉ có duy nhất một video đang phát; các video còn lại dừng. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. \texttt{ShortsFragment} gọi \texttt{GET /films/shorts}.\newline 2. Client gắn danh sách vào \texttt{ViewPager2} dọc.\newline 3. Khi page change, video đang hiển thị tự play, video trước/sau pause. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Hết danh sách}: Hiển thị placeholder \textit{Đã hết shorts}. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_09.1}: Bộ nhớ ExoPlayer phải được tái sử dụng để tránh tạo mới mỗi lần cuộn. \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-10} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Xem lịch Premier League} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Người xem (User) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Người dùng xem lịch thi đấu Ngoại hạng Anh, có thể lọc theo mùa giải và theo ngày. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Có kết nối Internet. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Lịch hiển thị theo giờ Việt Nam, đã quy đổi từ UTC. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. \texttt{PremierLeagueFragment} chọn mùa giải.\newline 2. \texttt{PremierLeagueRepository} gọi backend với tham số \texttt{season}, \texttt{date}.\newline 3. Backend trả về danh sách trận; client render theo nhóm ngày. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Không có trận nào}: Hiển thị thông báo \textit{Chưa có trận đấu trong ngày}. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_10.1}: Mọi mốc thời gian phải được hiển thị theo múi giờ \texttt{Asia/Ho\_Chi\_Minh}. \\ \hline
+\end{tabularx}
+\end{table}
+
+
+% ============================================================
+%  NHÓM 3: Quản trị Phim (UC-11 .. UC-14)
+% ============================================================
+\subsubsection*{Nhóm 3: Quản trị Phim}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-11} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Xem Dashboard quản trị} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Quản trị viên (Admin) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Admin truy cập bảng điều khiển với các chỉ số tổng quan và liên kết tới các khu vực quản lý. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Tài khoản có vai trò \texttt{ROLE\_ADMIN}. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & \texttt{AdminDashboardActivity} hiển thị các thẻ Films/Users/Categories/Stats. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. \texttt{MoreFragment} kiểm tra \texttt{AuthManager.isAdmin()}.\newline 2. Hiển thị card \textit{Admin Panel}.\newline 3. Mở \texttt{AdminDashboardActivity} qua \texttt{Intent}. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{User thường}: Card Admin Panel bị ẩn, không thể truy cập. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_11.1}: Việc phân quyền ở client chỉ là tầng UI; backend phải kiểm tra lại role ở mọi endpoint admin. \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-12} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Tạo phim mới} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Quản trị viên (Admin) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Admin tạo một phim mới với đầy đủ các thuộc tính: tiêu đề, mô tả, thumbnail, trailer, loại phim. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Đã đăng nhập với vai trò Admin. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Phim mới được lưu vào CSDL và xuất hiện trong \texttt{AdminFilmListActivity}. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. Admin bấm FAB \textit{Tạo mới} trong \texttt{AdminFilmListActivity}.\newline 2. \texttt{FilmFormDialogFragment} mở, Admin điền form.\newline 3. Client gọi \texttt{POST /admin/films}.\newline 4. Danh sách phim tự refresh. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Thiếu trường bắt buộc}: Backend trả \textit{Validation Failed (400)}; client hiển thị lỗi tại field tương ứng. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_12.1}: Trường \texttt{title} và \texttt{type} là bắt buộc. \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-13} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Cập nhật phim} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Quản trị viên (Admin) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Admin sửa thông tin một phim đã có. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Phim cần sửa tồn tại trong CSDL. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Phim được cập nhật, ứng dụng người dùng nhìn thấy ngay ở lần gọi API tiếp theo. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. Admin bấm item phim trong danh sách $\rightarrow$ chọn \textit{Sửa}.\newline 2. \texttt{FilmFormDialogFragment} mở với dữ liệu hiện tại.\newline 3. Admin sửa và bấm \textit{Lưu}.\newline 4. Client gọi \texttt{PUT /admin/films/\{id\}}. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Phim không tồn tại}: Backend trả 404; client hiển thị thông báo và đóng dialog. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_13.1}: Các tập (\texttt{Episode}) của phim không bị xoá khi sửa thông tin phim. \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-14} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Xoá phim} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Quản trị viên (Admin) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Admin xoá một phim khỏi hệ thống. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Phim cần xoá tồn tại. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Phim và các \texttt{Episode} liên quan bị xoá khỏi CSDL theo cơ chế cascade. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. Admin bấm icon xoá trên một item phim.\newline 2. Dialog xác nhận hiển thị.\newline 3. Admin xác nhận; client gọi \texttt{DELETE /admin/films/\{id\}}.\newline 4. Danh sách tự refresh. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Phim đang được tham chiếu}: Backend trả lỗi ràng buộc khoá ngoại; client hiển thị thông báo. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_14.1}: Thao tác xoá là không thể hoàn tác. \\ \hline
+\end{tabularx}
+\end{table}
+
+
+% ============================================================
+%  NHÓM 4: Quản lý Danh mục (UC-15)
+% ============================================================
+\subsubsection*{Nhóm 4: Quản lý Danh mục}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\cellcolor{gray!15}\bfseries Mã Usecase & \textbf{UC-15} \\ \hline
+\cellcolor{gray!15}\bfseries Tên Usecase & \textbf{Quản lý danh mục thể loại} \\ \hline
+\cellcolor{gray!15}\bfseries Tác nhân (Actors) & Quản trị viên (Admin) \\ \hline
+\cellcolor{gray!15}\bfseries Mô tả ngắn & Admin thêm, sửa, xoá các danh mục (Category) để phân loại phim. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện tiên quyết & Đã đăng nhập với vai trò Admin. \\ \hline
+\cellcolor{gray!15}\bfseries Điều kiện đảm bảo & Danh sách \texttt{Category} được cập nhật và phản ánh trên trang chủ ở lần gọi tiếp theo. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng sự kiện chính & 1. Admin mở khu vực \textit{Categories} từ Dashboard.\newline 2. Thực hiện thao tác CRUD trên danh sách.\newline 3. Client gọi endpoint \texttt{/admin/categories} tương ứng. \\ \hline
+\cellcolor{gray!15}\bfseries Luồng rẽ nhánh & \textbf{Xoá danh mục đang có phim}: Backend chặn xoá và trả lỗi; Admin phải gỡ liên kết phim trước. \\ \hline
+\cellcolor{gray!15}\bfseries Yêu cầu chức năng (FR) & $\diamond$ \textbf{FR\_15.1}: Tên danh mục là duy nhất trong toàn hệ thống. \\ \hline
+\end{tabularx}
+\end{table}

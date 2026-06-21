@@ -1,0 +1,15 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor A as Admin
+    participant MF as MoreFragment
+    participant AM as AuthManager
+    participant AD as AdminDashboardActivity
+
+    A->>MF: Mở tab More
+    MF->>AM: isAdmin()
+    AM-->>MF: true
+    MF->>MF: Hiển thị card "Admin Panel"
+    A->>MF: Bấm "Admin Panel"
+    MF->>AD: Intent
+    AD->>AD: Render grid Films/Users/<br/>Categories/Stats
+    AD-->>A: Hiển thị Dashboard
