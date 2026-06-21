@@ -1,0 +1,17 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant FD as FilmDetailActivity
+    participant API as UserContentController
+    participant SVC as UserContentService
+    participant DB as PostgreSQL
+
+    U->>FD: Nhấn nút "Yêu thích"
+    FD->>API: POST /favorites/{filmId}
+    API->>SVC: addFavorite(filmId)
+    SVC->>DB: INSERT INTO favorites (user_id, film_id)
+    DB-->>SVC: Thành công
+    SVC-->>API: FavoriteDto
+    API-->>FD: ApiResponse OK
+    FD->>FD: Cập nhật UI nút Yêu thích (màu hồng)
+    FD-->>U: Hiển thị thông báo "Đã thêm vào yêu thích"

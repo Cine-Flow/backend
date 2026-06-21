@@ -18,7 +18,7 @@ sequenceDiagram
     Note over U,API: Các request tiếp theo
 
     U->>LA: Mở màn hình khác
-    LA->>AI: Gọi API qua Retrofit
+    LA->>AI: Gọi API qua Volley
     AI->>AM: getToken()
     AM-->>AI: JWT
     AI->>API: Authorization: Bearer <JWT>

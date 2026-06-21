@@ -1,0 +1,26 @@
+%%{init: {"theme":"default"}}%%
+sequenceDiagram
+    actor U as Người dùng
+    participant MF as MoreFragment
+    participant EP as EditProfileActivity
+    participant API as UserContentController
+    participant SVC as UserContentService
+    participant DB as PostgreSQL
+
+    U->>MF: Mở Sửa hồ sơ
+    MF->>EP: Mở EditProfileActivity
+    EP->>API: GET /user/me
+    API->>SVC: getProfile()
+    SVC->>DB: SELECT * FROM users WHERE id = userId
+    DB-->>SVC: User entity
+    SVC-->>API: UserProfileDto
+    API-->>EP: ApiResponse OK
+    EP->>EP: Hiển thị thông tin cũ lên Form
+    U->>EP: Nhập họ tên mới + nhấn "Lưu"
+    EP->>API: PUT /user/profile (họ tên)
+    API->>SVC: updateProfile(request)
+    SVC->>DB: UPDATE users SET full_name = ...
+    DB-->>SVC: Thành công
+    SVC-->>API: UserProfileDto
+    API-->>EP: ApiResponse OK
+    EP-->>U: Thông báo cập nhật thành công

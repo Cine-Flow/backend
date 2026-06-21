@@ -1,12 +1,15 @@
 package com.android.cineflow.service.email;
 
+import com.android.cineflow.exceptions.EmailDeliveryException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -25,8 +28,9 @@ public class EmailService implements IEmailService {
     private String frontendUrl;
 
     @Override
-    @Async
     public void sendPasswordResetEmail(String toEmail, String token, String username) {
+        validateMailSenderConfig();
+
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -42,14 +46,20 @@ public class EmailService implements IEmailService {
             mailSender.send(message);
 
             log.info("Password reset email sent successfully to: {}", toEmail);
-        } catch (MessagingException e) {
+        } catch (MessagingException | MailException e) {
             log.error("Failed to send password reset email to: {}", toEmail, e);
+            throw new EmailDeliveryException("Không thể gửi email đặt lại mật khẩu. Vui lòng kiểm tra cấu hình SMTP của máy chủ.", e);
         }
     }
 
     @Override
     @Async
     public void sendWelcomeEmail(String toEmail, String username) {
+        if (!StringUtils.hasText(fromEmail)) {
+            log.warn("Skipping welcome email because spring.mail.username is not configured");
+            return;
+        }
+
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -64,8 +74,14 @@ public class EmailService implements IEmailService {
             mailSender.send(message);
 
             log.info("Welcome email sent successfully to: {}", toEmail);
-        } catch (MessagingException e) {
+        } catch (MessagingException | MailException e) {
             log.error("Failed to send welcome email to: {}", toEmail, e);
+        }
+    }
+
+    private void validateMailSenderConfig() {
+        if (!StringUtils.hasText(fromEmail)) {
+            throw new EmailDeliveryException("Máy chủ chưa cấu hình email gửi đi. Hãy thiết lập MAIL_USERNAME và MAIL_PASSWORD trước khi dùng quên mật khẩu.");
         }
     }
 
