@@ -122,6 +122,7 @@ public class AuthService implements IAuthService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void resetPassword(ResetPasswordRequest request) {
         log.info("Password reset attempt with token");
 
@@ -129,7 +130,9 @@ public class AuthService implements IAuthService {
             throw new IllegalArgumentException("Passwords do not match");
         }
 
-        User user = userRepository.findByResetToken(request.getToken())
+        String token = normalizeResetToken(request.getToken());
+
+        User user = userRepository.findByResetToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid or expired reset token"));
 
         if (!user.isResetTokenValid()) {
@@ -151,9 +154,25 @@ public class AuthService implements IAuthService {
 
     @Override
     public boolean validateResetToken(String token) {
-        return userRepository.findByResetToken(token)
+        return userRepository.findByResetToken(normalizeResetToken(token))
                 .map(User::isResetTokenValid)
                 .orElse(false);
+    }
+
+    private String normalizeResetToken(String rawToken) {
+        if (rawToken == null) {
+            return "";
+        }
+
+        String token = rawToken.trim();
+        int tokenParamIndex = token.indexOf("token=");
+        if (tokenParamIndex >= 0) {
+            String tokenValue = token.substring(tokenParamIndex + "token=".length());
+            int ampersandIndex = tokenValue.indexOf('&');
+            return ampersandIndex >= 0 ? tokenValue.substring(0, ampersandIndex).trim() : tokenValue.trim();
+        }
+
+        return token;
     }
 
     @Override
