@@ -3,13 +3,18 @@
 % ============================================================
 \begingroup
 \renewcommand{\addcontentsline}[3]{}
+\titleformat{\chapter}[hang]
+  {\normalfont\Large\bfseries\centering}
+  {}{0pt}{\Large\MakeUppercase}
 \chapter{BẢNG PHÂN CÔNG CÔNG VIỆC}
 \label{appendix:phan_cong}
 \endgroup
 
 Bảng dưới đây liệt kê chi tiết phân công nhiệm vụ của 3 thành viên nhóm theo từng giai đoạn của đồ án CineFlow, đảm bảo sự cân bằng về khối lượng công việc khi mỗi thành viên đều đảm nhiệm song song cả phát triển giao diện (Frontend) lẫn logic nghiệp vụ (Backend) cho các cấu phần tương ứng:
 
-\begin{longtable}{|c|p{4.5cm}|p{9.5cm}|}
+\begingroup
+\singlespacing
+\begin{longtable}{|c|p{3cm}|p{11.2cm}|}
   \hline
   \textbf{STT} & \textbf{Họ và tên \& MSSV} & \textbf{Nhiệm vụ chi tiết} \\
   \hline
@@ -31,7 +36,7 @@ Bảng dưới đây liệt kê chi tiết phân công nhiệm vụ của 3 thà
   \textbullet\ \textbf{More \& Account (Cá nhân):} Xây dựng giao diện trang cá nhân (\texttt{MoreFragment} / \texttt{AccountActivity}), các Custom Dialog bo góc điều chỉnh hồ sơ thông tin và đổi mật khẩu; lập trình API cập nhật Họ tên, Số điện thoại và đổi mật khẩu. \newline
   \textbf{2. Nhiệm vụ phối hợp:} \newline
   \textbullet\ \textbf{MinIO Storage:} Cấu hình dịch vụ Docker MinIO, viết API upload media (\texttt{/api/v1/files/upload}) và script PowerShell seed media. \newline
-  \textbullet\ \textbf{Bảo mật & Thống kê:} Triển khai Token Rotation \& Theft Detection ở Backend và \texttt{TokenAuthenticator} ở Client. Lập trình giao diện biểu đồ Thống kê cá nhân (\texttt{UserAnalyticsActivity}) và API tổng hợp dữ liệu thời lượng/thể loại xem phim. \\
+  \textbullet\ \textbf{Bảo mật \& Thống kê:} Triển khai Token Rotation \& Theft Detection ở Backend và \texttt{TokenAuthenticator} ở Client. Lập trình giao diện biểu đồ Thống kê cá nhân (\texttt{UserAnalyticsActivity}) và API tổng hợp dữ liệu thời lượng/thể loại xem phim. \\
   \hline
 
   2 & \textbf{Dương Trí Phúc} \newline
@@ -57,3 +62,4 @@ Bảng dưới đây liệt kê chi tiết phân công nhiệm vụ của 3 thà
   \hline
 
 \end{longtable}
+\endgroup
