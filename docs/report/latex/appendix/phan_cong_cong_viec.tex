@@ -1,59 +1,59 @@
 % ============================================================
 %  PHỤ LỤC: BẢNG PHÂN CÔNG CÔNG VIỆC
 % ============================================================
+\begingroup
+\renewcommand{\addcontentsline}[3]{}
 \chapter{BẢNG PHÂN CÔNG CÔNG VIỆC}
 \label{appendix:phan_cong}
+\endgroup
 
-Bảng dưới đây liệt kê chi tiết phân công nhiệm vụ của các thành viên nhóm theo từng giai đoạn của đồ án CineFlow: \textit{Phân tích yêu cầu}, \textit{Thiết kế hệ thống}, \textit{Lập trình (Backend / Android)}, \textit{Kiểm thử} và \textit{Viết báo cáo}.
+Bảng dưới đây liệt kê chi tiết phân công nhiệm vụ của 3 thành viên nhóm theo từng giai đoạn của đồ án CineFlow, đảm bảo sự cân bằng về khối lượng công việc khi mỗi thành viên đều đảm nhiệm song song cả phát triển giao diện (Frontend) lẫn logic nghiệp vụ (Backend) cho các cấu phần tương ứng:
 
-\begin{longtable}{|c|p{4cm}|p{7cm}|c|}
+\begin{longtable}{|c|p{4.5cm}|p{9.5cm}|}
   \hline
-  \textbf{STT} & \textbf{Họ và tên} & \textbf{Nhiệm vụ} & \textbf{Đóng góp} \\
+  \textbf{STT} & \textbf{Họ và tên \& MSSV} & \textbf{Nhiệm vụ chi tiết} \\
   \hline
   \endfirsthead
 
   \hline
-  \textbf{STT} & \textbf{Họ và tên} & \textbf{Nhiệm vụ} & \textbf{Đóng góp} \\
+  \textbf{STT} & \textbf{Họ và tên \& MSSV} & \textbf{Nhiệm vụ chi tiết} \\
   \hline
   \endhead
 
   \hline
   \endfoot
 
-  1 & \placeholder{Họ tên 1 (Nhóm trưởng)} &
-  \textbullet\ Phân tích yêu cầu, đặc tả Use Case UC-01--UC-15. \newline
-  \textbullet\ Thiết kế kiến trúc tổng thể, ERD, sơ đồ tuần tự. \newline
-  \textbullet\ Backend: \texttt{AuthController}, \texttt{AuthService}, \texttt{SecurityConfig}, JWT, Flyway V1--V4. \newline
-  \textbullet\ Tổng hợp và viết Chương I, II, IV của báo cáo.
-  & \placeholder{X\%} \\
+  1 & \textbf{Trần Sĩ Cường} \newline
+  MSSV: N22DCCN013 \newline
+  (Trưởng nhóm) &
+  \textbf{1. Nhiệm vụ chính:} \newline
+  \textbullet\ \textbf{Premier League (Bóng đá):} Thiết kế giao diện lịch thi đấu (\texttt{PremierLeagueFragment}); viết API/Service kết nối cổng dữ liệu API ngoài (\texttt{FootballDataClient} kèm cache), ánh xạ highlight bóng đá dựa trên trường \texttt{badge}. \newline
+  \textbullet\ \textbf{More \& Account (Cá nhân):} Xây dựng giao diện trang cá nhân (\texttt{MoreFragment} / \texttt{AccountActivity}), các Custom Dialog bo góc điều chỉnh hồ sơ thông tin và đổi mật khẩu; lập trình API cập nhật Họ tên, Số điện thoại và đổi mật khẩu. \newline
+  \textbf{2. Nhiệm vụ phối hợp:} \newline
+  \textbullet\ \textbf{MinIO Storage:} Cấu hình dịch vụ Docker MinIO, viết API upload media (\texttt{/api/v1/files/upload}) và script PowerShell seed media. \newline
+  \textbullet\ \textbf{Bảo mật & Thống kê:} Triển khai Token Rotation \& Theft Detection ở Backend và \texttt{TokenAuthenticator} ở Client. Lập trình giao diện biểu đồ Thống kê cá nhân (\texttt{UserAnalyticsActivity}) và API tổng hợp dữ liệu thời lượng/thể loại xem phim. \\
   \hline
 
-  2 & \placeholder{Họ tên 2} &
-  \textbullet\ Backend: \texttt{FilmController}, \texttt{FilmService}, \texttt{CategoryService}, \texttt{ShortsService}, repository JPA. \newline
-  \textbullet\ Thiết kế DTO, \texttt{ApiResponse<T>}, \texttt{GlobalExceptionHandler}. \newline
-  \textbullet\ Kiểm thử API bằng Postman, viết Chương III phần backend.
-  & \placeholder{X\%} \\
+  2 & \textbf{Dương Trí Phúc} \newline
+  MSSV: N22DCCN061 \newline
+  (Thành viên) &
+  \textbf{1. Nhiệm vụ chính:} \newline
+  \textbullet\ \textbf{Trang chủ (Home):} Thiết kế cấu trúc giao diện trang chủ (\texttt{HomeFragment}) phân vùng banners, phim ảnh và thể thao; lập trình REST API lấy dữ liệu tổng hợp trang chủ (\texttt{/api/v1/films/home}). \newline
+  \textbullet\ \textbf{Shorts (Video ngắn):} Xây dựng giao diện video ngắn dạng cuộn dọc (\texttt{ShortsFragment}) sử dụng \texttt{ViewPager2}, tích hợp thả tim và bình luận; viết REST API Shorts hỗ trợ danh sách, thích và lưu bình luận dạng JSON/JSONB. \newline
+  \textbf{2. Nhiệm vụ phối hợp:} \newline
+  \textbullet\ \textbf{Phát video \& ExoPlayer:} Tích hợp trình phát ExoPlayer phát video streaming, xử lý hàm phân giải loopback IP \texttt{resolveLocalhostUrl()} cho thiết bị Emulator. \newline
+  \textbullet\ \textbf{Tải ngoại tuyến (Offline):} Lập trình giao diện quản lý tải offline, lớp quản lý lưu trữ dữ liệu tải ngoại tuyến (\texttt{OfflineDownloadManager}) bằng SharedPreferences và Gson. \\
   \hline
 
-  3 & \placeholder{Họ tên 3} &
-  \textbullet\ Android: \texttt{MainActivity}, \texttt{HomeFragment}, \texttt{ShortsFragment}, \texttt{PremierLeagueFragment}, \texttt{MoreFragment}. \newline
-  \textbullet\ Tầng dữ liệu Android: \texttt{ApiClient}, \texttt{HomeRepository}, \texttt{PremierLeagueRepository}, \texttt{BaseFragment}. \newline
-  \textbullet\ Thiết kế bộ màu (\texttt{colors.xml}) và layout chính.
-  & \placeholder{X\%} \\
-  \hline
-
-  4 & \placeholder{Họ tên 4} &
-  \textbullet\ Android: luồng xác thực (\texttt{LoginActivity}, \texttt{RegisterActivity}, \texttt{ForgotPasswordActivity}), \texttt{AuthManager}, \texttt{AuthInterceptor}. \newline
-  \textbullet\ Phân hệ Admin: \texttt{AdminDashboardActivity}, \texttt{AdminFilmListActivity}, \texttt{FilmFormDialogFragment}, \texttt{AdminFilmRepository}. \newline
-  \textbullet\ Tích hợp ExoPlayer trong \texttt{FilmDetailActivity}, \texttt{PlayerActivity}. \newline
-  \textbullet\ Kiểm thử trên Android Emulator, viết Chương III phần Android.
-  & \placeholder{X\%} \\
+  3 & \textbf{Nguyễn Anh Kha} \newline
+  MSSV: N22DCCN038 \newline
+  (Thành viên) &
+  \textbf{1. Nhiệm vụ chính:} \newline
+  \textbullet\ \textbf{Phim lẻ \& Phim bộ:} Thiết kế giao diện chi tiết phim (\texttt{FilmDetailActivity}) hiển thị thông tin phim lẻ và danh sách tập phim bộ; viết REST API truy xuất thông tin chi tiết phim và tập phim liên kết (\texttt{/api/v1/films/\{id\}}). \newline
+  \textbullet\ \textbf{Quản trị Admin:} Xây dựng Dashboard điều hướng Admin (\texttt{AdminDashboardActivity}), danh sách quản lý phim (\texttt{AdminFilmListActivity}), biểu mẫu dialog thêm/sửa phim bộ và tập phim (\texttt{FilmFormDialogFragment}); lập trình REST API CRUD phim, tập phim, danh mục và cấu hình phân quyền Security (\texttt{SecurityConfig}). \newline
+  \textbf{2. Nhiệm vụ phối hợp:} \newline
+  \textbullet\ \textbf{Xác thực tài khoản (Auth):} Xây dựng giao diện Đăng ký (\texttt{RegisterActivity}), Đăng nhập (\texttt{LoginActivity}), Quên mật khẩu (\texttt{ForgotPasswordActivity}); lập trình REST API xác thực JWT và cơ chế Spring Mail gửi mã đặt lại mật khẩu. \newline
+  \textbullet\ \textbf{Đa ngôn ngữ (Localization):} Triển khai cấu trúc đa ngôn ngữ Anh - Việt. \\
   \hline
 
 \end{longtable}
-
-\noindent\textbf{Ghi chú:}
-\begin{itemize}
-    \item Cột \textit{Đóng góp} được thống nhất bởi cả nhóm sau khi đối chiếu commit history trên hai repository (\texttt{backend} và \texttt{frontend-cineflow}) và biên bản các buổi họp nhóm.
-    \item Toàn bộ thành viên đều tham gia đóng góp ý kiến và rà soát các chương báo cáo trước khi nộp.
-\end{itemize}
