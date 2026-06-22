@@ -44,6 +44,10 @@ public class User {
     @Builder.Default
     private UserRole role = UserRole.ROLE_USER;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean enabled = true;
+
     @Column(name = "reset_token")
     private String resetToken;
 

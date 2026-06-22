@@ -178,6 +178,14 @@ public class AdminService {
     }
 
     @Transactional
+    public AdminUserDto setUserEnabled(String id, boolean enabled) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        user.setEnabled(enabled);
+        return toUserDto(userRepository.save(user), getActiveSubscription(id));
+    }
+
+    @Transactional
     public void resetUserPassword(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -321,6 +329,7 @@ public class AdminService {
                 .phoneNumber(user.getPhoneNumber())
                 .avatarUrl(user.getAvatarUrl())
                 .role(user.getRole().name())
+                .enabled(user.isEnabled())
                 .createdAt(user.getCreatedAt())
                 .subscriptionPlan(subscription != null ? subscription.getSubscriptionPackage().getName() : null)
                 .subscriptionEndDate(subscription != null ? subscription.getEndDate() : null)
