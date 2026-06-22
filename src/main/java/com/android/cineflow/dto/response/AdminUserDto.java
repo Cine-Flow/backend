@@ -16,6 +16,7 @@ public class AdminUserDto {
     private String phoneNumber;
     private String avatarUrl;
     private String role;
+    private boolean enabled;
     private Instant createdAt;
     private String subscriptionPlan;
     private LocalDateTime subscriptionEndDate;

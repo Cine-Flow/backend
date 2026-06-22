@@ -70,6 +70,14 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success("User deleted"));
     }
 
+    @PutMapping("/users/{id}/status")
+    public ResponseEntity<ApiResponse<AdminUserDto>> setUserStatus(
+            @PathVariable String id,
+            @RequestParam boolean enabled) {
+        String message = enabled ? "User unblocked" : "User blocked";
+        return ResponseEntity.ok(ApiResponse.success(message, adminService.setUserEnabled(id, enabled)));
+    }
+
     @PostMapping("/users/{id}/reset-password")
     public ResponseEntity<ApiResponse<Void>> resetPassword(@PathVariable String id) {
         adminService.resetUserPassword(id);
