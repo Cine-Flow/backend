@@ -6,14 +6,13 @@ import com.android.cineflow.dto.response.AdminAnalyticsDto;
 import com.android.cineflow.dto.response.AdminCategoryDto;
 import com.android.cineflow.dto.response.AdminUserDto;
 import com.android.cineflow.dto.response.ApiResponse;
+import com.android.cineflow.dto.response.PagedResponse;
 import com.android.cineflow.service.admin.AdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("${api.prefix}/admin")
@@ -22,8 +21,12 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping("/categories")
-    public ResponseEntity<ApiResponse<List<AdminCategoryDto>>> getCategories() {
-        return ResponseEntity.ok(ApiResponse.success("Admin categories fetched", adminService.getCategories()));
+    public ResponseEntity<ApiResponse<PagedResponse<AdminCategoryDto>>> getCategories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search) {
+        return ResponseEntity.ok(ApiResponse.success("Admin categories fetched",
+                adminService.getCategoriesPaged(page, size, search)));
     }
 
     @PostMapping("/categories")
@@ -46,18 +49,12 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<ApiResponse<List<AdminUserDto>>> getUsers(
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String role,
-            @RequestParam(required = false) String subscription) {
+    public ResponseEntity<ApiResponse<PagedResponse<AdminUserDto>>> getUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search) {
         return ResponseEntity.ok(ApiResponse.success("Admin users fetched",
-                adminService.getUsers(search, role, subscription)));
-    }
-
-    @PostMapping("/users")
-    public ResponseEntity<ApiResponse<AdminUserDto>> createUser(@Valid @RequestBody AdminUserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("User created", adminService.createUser(request)));
+                adminService.getUsersPaged(page, size, search)));
     }
 
     @PutMapping("/users/{id}")
