@@ -1,6 +1,5 @@
 package com.android.cineflow.dto.request;
 
-import com.android.cineflow.model.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -22,5 +21,4 @@ public class AdminUserRequest {
     private String fullName;
     private String phoneNumber;
     private String avatarUrl;
-    private UserRole role;
 }

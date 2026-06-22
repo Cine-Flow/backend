@@ -5,6 +5,7 @@ import com.android.cineflow.dto.request.AdminUserRequest;
 import com.android.cineflow.dto.response.AdminAnalyticsDto;
 import com.android.cineflow.dto.response.AdminCategoryDto;
 import com.android.cineflow.dto.response.AdminUserDto;
+import com.android.cineflow.dto.response.PagedResponse;
 import com.android.cineflow.exceptions.DuplicateResourceException;
 import com.android.cineflow.exceptions.ResourceNotFoundException;
 import com.android.cineflow.model.Category;
@@ -16,6 +17,8 @@ import com.android.cineflow.model.enums.SubscriptionStatus;
 import com.android.cineflow.model.enums.UserRole;
 import com.android.cineflow.repository.CategoryRepository;
 import com.android.cineflow.repository.EpisodeRepository;
+import com.android.cineflow.repository.FavoriteRepository;
+import com.android.cineflow.repository.FilmCommentRepository;
 import com.android.cineflow.repository.FilmRepository;
 import com.android.cineflow.repository.UserRepository;
 import com.android.cineflow.repository.UserSubscriptionRepository;
@@ -26,7 +29,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -50,6 +52,8 @@ public class AdminService {
     private final FilmRepository filmRepository;
     private final EpisodeRepository episodeRepository;
     private final WatchHistoryRepository watchHistoryRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final FilmCommentRepository filmCommentRepository;
     private final PasswordEncoder passwordEncoder;
     private final IEmailService emailService;
 
@@ -61,6 +65,31 @@ public class AdminService {
                 .sorted(Comparator.comparing(Category::getId))
                 .map(c -> toCategoryDto(c, filmCounts.getOrDefault(c.getId(), 0L)))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<AdminCategoryDto> getCategoriesPaged(int page, int size, String search) {
+        Map<Integer, Long> filmCounts = categoryRepository.countFilmsByCategory().stream()
+                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
+
+        List<AdminCategoryDto> all = categoryRepository.findAll().stream()
+                .sorted(Comparator.comparing(Category::getId))
+                .map(c -> toCategoryDto(c, filmCounts.getOrDefault(c.getId(), 0L)))
+                .toList();
+
+        String q = search == null ? "" : search.trim().toLowerCase(Locale.ROOT);
+        List<AdminCategoryDto> filtered = q.isEmpty() ? all : all.stream()
+                .filter(c -> contains(c.getName(), q)
+                        || contains(c.getDescription(), q))
+                .toList();
+
+        int total = filtered.size();
+        int totalPages = (int) Math.ceil((double) total / size);
+        int fromIndex = Math.min(page * size, total);
+        int toIndex = Math.min(fromIndex + size, total);
+        List<AdminCategoryDto> content = filtered.subList(fromIndex, toIndex);
+
+        return PagedResponse.of(content, page, size, total);
     }
 
     @Transactional
@@ -96,48 +125,32 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public List<AdminUserDto> getUsers(String search, String role, String subscription) {
+    public PagedResponse<AdminUserDto> getUsersPaged(int page, int size, String search) {
         String q = search == null ? "" : search.trim().toLowerCase(Locale.ROOT);
-        String roleFilter = role == null ? "" : role.trim();
-        String subFilter = subscription == null ? "" : subscription.trim();
 
         Map<String, UserSubscription> activeSubs = subscriptionRepository.findAll().stream()
                 .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE)
                 .collect(Collectors.toMap(s -> s.getUser().getId(), Function.identity(),
                         (a, b) -> a.getEndDate().isAfter(b.getEndDate()) ? a : b));
 
-        return userRepository.findAll().stream()
+        List<AdminUserDto> all = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == UserRole.ROLE_USER)
                 .filter(u -> q.isEmpty()
                         || contains(u.getUsername(), q)
                         || contains(u.getEmail(), q)
                         || contains(u.getFullName(), q)
                         || contains(u.getPhoneNumber(), q))
-                .filter(u -> roleFilter.isEmpty() || "ALL".equalsIgnoreCase(roleFilter)
-                        || u.getRole().name().equalsIgnoreCase(roleFilter))
-                .filter(u -> {
-                    boolean premium = activeSubs.containsKey(u.getId());
-                    return subFilter.isEmpty() || "ALL".equalsIgnoreCase(subFilter)
-                            || ("PREMIUM".equalsIgnoreCase(subFilter) && premium)
-                            || ("FREE".equalsIgnoreCase(subFilter) && !premium);
-                })
                 .sorted(Comparator.comparing(User::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(u -> toUserDto(u, activeSubs.get(u.getId())))
                 .toList();
-    }
 
-    @Transactional
-    public AdminUserDto createUser(AdminUserRequest request) {
-        validateUniqueUser(request, null);
-        User user = User.builder()
-                .username(request.getUsername().trim())
-                .email(request.getEmail().trim())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .fullName(blankToNull(request.getFullName()))
-                .phoneNumber(blankToNull(request.getPhoneNumber()))
-                .avatarUrl(blankToNull(request.getAvatarUrl()))
-                .role(request.getRole() != null ? request.getRole() : UserRole.ROLE_USER)
-                .build();
-        return toUserDto(userRepository.save(user), null);
+        long total = all.size();
+        int totalPages = (int) Math.ceil((double) total / size);
+        int fromIndex = (int) Math.min((long) page * size, total);
+        int toIndex = (int) Math.min((long) fromIndex + size, total);
+        List<AdminUserDto> content = all.subList(fromIndex, toIndex);
+
+        return PagedResponse.of(content, page, size, total);
     }
 
     @Transactional
@@ -150,9 +163,6 @@ public class AdminService {
         user.setFullName(blankToNull(request.getFullName()));
         user.setPhoneNumber(blankToNull(request.getPhoneNumber()));
         user.setAvatarUrl(blankToNull(request.getAvatarUrl()));
-        if (request.getRole() != null) {
-            user.setRole(request.getRole());
-        }
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
@@ -183,60 +193,114 @@ public class AdminService {
         int days = period == 7 || period == 90 ? period : 30;
         Instant since = Instant.now().minus(days, ChronoUnit.DAYS);
         LocalDateTime sinceLocal = LocalDateTime.now().minusDays(days);
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate startDate = today.minusDays(days - 1L);
 
         List<User> users = userRepository.findAll();
         List<Film> films = filmRepository.findAll();
         List<Episode> episodes = episodeRepository.findAll();
-        List<UserSubscription> subscriptions = subscriptionRepository.findAll();
-        List<UserSubscription> activeSubscriptions = subscriptions.stream()
-                .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE)
-                .toList();
+        List<com.android.cineflow.model.Favorite> favorites = favoriteRepository.findAll();
+        List<com.android.cineflow.model.FilmComment> comments = filmCommentRepository.findAll();
+        List<com.android.cineflow.model.WatchHistory> watches = watchHistoryRepository.findAll();
 
-        long premiumUsers = activeSubscriptions.stream()
-                .map(s -> s.getUser().getId())
+        Map<Integer, Long> viewsByFilm = episodes.stream()
+                .collect(Collectors.groupingBy(e -> e.getFilm().getId(),
+                        Collectors.summingLong(e -> e.getViewCount() != null ? e.getViewCount() : 0)));
+
+        long activeUsers = watches.stream()
+                .filter(w -> w.getLastWatchedAt() != null && w.getLastWatchedAt().isAfter(sinceLocal))
+                .map(w -> w.getUser().getId())
                 .distinct()
                 .count();
-        BigDecimal revenue = activeSubscriptions.stream()
-                .map(s -> s.getSubscriptionPackage().getPrice())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        long premiumFilms = films.stream().filter(Film::getIsPremium).count();
+        long freeFilms = films.size() - premiumFilms;
 
         return AdminAnalyticsDto.builder()
                 .period(days)
                 .totalUsers(users.size())
                 .newSignups(users.stream().filter(u -> u.getCreatedAt() != null && u.getCreatedAt().isAfter(since)).count())
+                .activeUsers(activeUsers)
                 .episodeViews(episodes.stream().mapToLong(e -> e.getViewCount() != null ? e.getViewCount() : 0).sum())
                 .watchSessions(watchHistoryRepository.countByLastWatchedAtAfter(sinceLocal))
-                .premiumUsers(premiumUsers)
-                .revenue(revenue)
+                .totalFavorites(favorites.size())
+                .totalComments(comments.size())
+                .dailySignups(bucketByDay(startDate, days,
+                        users.stream()
+                                .filter(u -> u.getCreatedAt() != null)
+                                .map(u -> u.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toLocalDate())
+                                .toList()))
+                .dailyWatchSessions(bucketByDay(startDate, days,
+                        watches.stream()
+                                .filter(w -> w.getLastWatchedAt() != null)
+                                .map(w -> w.getLastWatchedAt().toLocalDate())
+                                .toList()))
                 .filmTypes(films.stream()
                         .collect(Collectors.groupingBy(f -> f.getType().name(), Collectors.counting()))
                         .entrySet().stream()
                         .map(e -> new AdminAnalyticsDto.MetricSlice(e.getKey(), e.getValue()))
                         .toList())
-                .subscriptions(activeSubscriptions.stream()
-                        .collect(Collectors.groupingBy(s -> s.getSubscriptionPackage().getName(), Collectors.counting()))
-                        .entrySet().stream()
-                        .map(e -> new AdminAnalyticsDto.MetricSlice(e.getKey(), e.getValue()))
-                        .toList())
+                .premiumFreeMix(List.of(
+                        new AdminAnalyticsDto.MetricSlice("Premium", premiumFilms),
+                        new AdminAnalyticsDto.MetricSlice("Free", freeFilms)))
                 .topCategories(getCategories().stream()
                         .sorted(Comparator.comparing(AdminCategoryDto::getFilmCount).reversed())
                         .limit(6)
                         .map(c -> new AdminAnalyticsDto.MetricBar(c.getName(), c.getFilmCount()))
                         .toList())
-                .topFilms(topFilms(films, episodes))
+                .topFilms(topFilmsByViews(films, viewsByFilm))
+                .topFavoritedFilms(topFilmsByCount(favorites.stream()
+                        .collect(Collectors.groupingBy(f -> f.getFilm().getId(), Collectors.counting())), films))
+                .topCommentedFilms(topFilmsByCount(comments.stream()
+                        .collect(Collectors.groupingBy(c -> c.getFilm().getId(), Collectors.counting())), films))
+                .topEpisodes(topEpisodes(episodes))
+                .filmsWithZeroViews(films.stream()
+                        .filter(f -> viewsByFilm.getOrDefault(f.getId(), 0L) == 0L)
+                        .count())
                 .build();
     }
 
-    private List<AdminAnalyticsDto.MetricBar> topFilms(List<Film> films, List<Episode> episodes) {
-        Map<Integer, Long> viewsByFilm = episodes.stream()
-                .collect(Collectors.groupingBy(e -> e.getFilm().getId(),
-                        Collectors.summingLong(e -> e.getViewCount() != null ? e.getViewCount() : 0)));
+    private List<AdminAnalyticsDto.TimePoint> bucketByDay(java.time.LocalDate start, int days,
+                                                          List<java.time.LocalDate> dates) {
+        Map<java.time.LocalDate, Long> counts = dates.stream()
+                .filter(d -> !d.isBefore(start))
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        List<AdminAnalyticsDto.TimePoint> points = new ArrayList<>(days);
+        for (int i = 0; i < days; i++) {
+            java.time.LocalDate d = start.plusDays(i);
+            points.add(new AdminAnalyticsDto.TimePoint(d.toString(), counts.getOrDefault(d, 0L)));
+        }
+        return points;
+    }
+
+    private List<AdminAnalyticsDto.MetricBar> topFilmsByViews(List<Film> films, Map<Integer, Long> viewsByFilm) {
         List<AdminAnalyticsDto.MetricBar> bars = new ArrayList<>();
         films.stream()
                 .sorted(Comparator.comparing((Film f) -> viewsByFilm.getOrDefault(f.getId(), 0L)).reversed())
                 .limit(6)
                 .forEach(f -> bars.add(new AdminAnalyticsDto.MetricBar(f.getTitle(), viewsByFilm.getOrDefault(f.getId(), 0L))));
         return bars;
+    }
+
+    private List<AdminAnalyticsDto.MetricBar> topFilmsByCount(Map<Integer, Long> countsByFilm, List<Film> films) {
+        Map<Integer, String> titles = films.stream().collect(Collectors.toMap(Film::getId, Film::getTitle));
+        return countsByFilm.entrySet().stream()
+                .sorted(Map.Entry.<Integer, Long>comparingByValue().reversed())
+                .limit(6)
+                .map(e -> new AdminAnalyticsDto.MetricBar(
+                        titles.getOrDefault(e.getKey(), "#" + e.getKey()), e.getValue()))
+                .toList();
+    }
+
+    private List<AdminAnalyticsDto.MetricBar> topEpisodes(List<Episode> episodes) {
+        return episodes.stream()
+                .filter(e -> e.getViewCount() != null && e.getViewCount() > 0)
+                .sorted(Comparator.comparing(Episode::getViewCount).reversed())
+                .limit(6)
+                .map(e -> new AdminAnalyticsDto.MetricBar(
+                        e.getFilm().getTitle() + " · Ep " + e.getEpisodeNumber(),
+                        e.getViewCount()))
+                .toList();
     }
 
     private AdminCategoryDto toCategoryDto(Category category, long filmCount) {
